@@ -1,0 +1,104 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\USER\\Desktop\\Human Resources - Version 2\\Lifepoint\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{0368259C-FBA2-432E-BA94-0C8F42B46E64}|Lifepoint\\Lifepoint.csproj|c:\\users\\user\\desktop\\human resources - version 2\\lifepoint\\lifepoint\\admin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0368259C-FBA2-432E-BA94-0C8F42B46E64}|Lifepoint\\Lifepoint.csproj|solutionrelative:lifepoint\\admin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0368259C-FBA2-432E-BA94-0C8F42B46E64}|Lifepoint\\Lifepoint.csproj|c:\\users\\user\\desktop\\human resources - version 2\\lifepoint\\lifepoint\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0368259C-FBA2-432E-BA94-0C8F42B46E64}|Lifepoint\\Lifepoint.csproj|solutionrelative:lifepoint\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0368259C-FBA2-432E-BA94-0C8F42B46E64}|Lifepoint\\Lifepoint.csproj|C:\\Users\\USER\\Desktop\\Human Resources - Version 2\\Lifepoint\\lifepoint\\admin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{0368259C-FBA2-432E-BA94-0C8F42B46E64}|Lifepoint\\Lifepoint.csproj|solutionrelative:lifepoint\\admin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0368259C-FBA2-432E-BA94-0C8F42B46E64}|Lifepoint\\Lifepoint.csproj|c:\\users\\user\\desktop\\human resources - version 2\\lifepoint\\lifepoint\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0368259C-FBA2-432E-BA94-0C8F42B46E64}|Lifepoint\\Lifepoint.csproj|solutionrelative:lifepoint\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0368259C-FBA2-432E-BA94-0C8F42B46E64}|Lifepoint\\Lifepoint.csproj|c:\\users\\user\\desktop\\human resources - version 2\\lifepoint\\lifepoint\\admin.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0368259C-FBA2-432E-BA94-0C8F42B46E64}|Lifepoint\\Lifepoint.csproj|solutionrelative:lifepoint\\admin.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{74946827-37a0-11d2-a273-00c04f8ef4ff}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\Desktop\\Human Resources - Version 2\\Lifepoint\\Lifepoint\\Program.cs",
+              "RelativeDocumentMoniker": "Lifepoint\\Program.cs",
+              "ToolTip": "C:\\Users\\USER\\Desktop\\Human Resources - Version 2\\Lifepoint\\Lifepoint\\Program.cs",
+              "RelativeToolTip": "Lifepoint\\Program.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAArwA0AAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-13T06:30:02.275Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Admin.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\Desktop\\Human Resources - Version 2\\Lifepoint\\Lifepoint\\Admin.cs",
+              "RelativeDocumentMoniker": "Lifepoint\\Admin.cs",
+              "ToolTip": "C:\\Users\\USER\\Desktop\\Human Resources - Version 2\\Lifepoint\\Lifepoint\\Admin.cs",
+              "RelativeToolTip": "Lifepoint\\Admin.cs",
+              "ViewState": "AgIAADoCAAAAAAAAAAAlwEoCAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-03T12:33:25.148Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Form1.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\Desktop\\Human Resources - Version 2\\Lifepoint\\Lifepoint\\Form1.cs",
+              "RelativeDocumentMoniker": "Lifepoint\\Form1.cs",
+              "ToolTip": "C:\\Users\\USER\\Desktop\\Human Resources - Version 2\\Lifepoint\\Lifepoint\\Form1.cs",
+              "RelativeToolTip": "Lifepoint\\Form1.cs",
+              "ViewState": "AgIAADIAAAAAAAAAAAAwwIQAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-03T12:51:48.502Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Admin.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\USER\\Desktop\\Human Resources - Version 2\\Lifepoint\\Lifepoint\\Admin.cs",
+              "RelativeDocumentMoniker": "Lifepoint\\Admin.cs",
+              "ToolTip": "C:\\Users\\USER\\Desktop\\Human Resources - Version 2\\Lifepoint\\Lifepoint\\Admin.cs [Design]",
+              "RelativeToolTip": "Lifepoint\\Admin.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-03T12:31:06.328Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Admin.Designer.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\Desktop\\Human Resources - Version 2\\Lifepoint\\Lifepoint\\Admin.Designer.cs",
+              "RelativeDocumentMoniker": "Lifepoint\\Admin.Designer.cs",
+              "ToolTip": "C:\\Users\\USER\\Desktop\\Human Resources - Version 2\\Lifepoint\\Lifepoint\\Admin.Designer.cs",
+              "RelativeToolTip": "Lifepoint\\Admin.Designer.cs",
+              "ViewState": "AgIAABoAAAAAAAAAAAApwC4AAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-03T12:31:11.323Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
