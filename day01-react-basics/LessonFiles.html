@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Day 01 — React JSX Basics</title>
+<link rel="icon" href="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" type="image/svg+xml" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: #1e1e2e;
+    --accent: #f0e040;
+    --accent2: #40e0d0;
+    --text: #e8e8f0;
+    --muted: #6b6b88;
+    --code-bg: #0d0d16;
+    --green: #4ade80;
+    --red: #f87171;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 2rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+  }
+
+  .logo {
+    font-size: 0.75rem;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .progress-bar {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .progress-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 1px solid var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .progress-dot.active { background: var(--accent); border-color: var(--accent); }
+  .progress-dot.done { background: var(--green); border-color: var(--green); }
+
+  .hero {
+    padding: 5rem 3rem 3rem;
+    max-width: 900px;
+  }
+
+  .day-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    color: var(--muted);
+    max-width: 500px;
+    line-height: 1.7;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 3rem 6rem;
+  }
+
+  .lesson {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+    transition: border-color 0.2s;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .lesson:nth-child(1) { animation-delay: 0.05s; }
+  .lesson:nth-child(2) { animation-delay: 0.1s; }
+  .lesson:nth-child(3) { animation-delay: 0.15s; }
+  .lesson:nth-child(4) { animation-delay: 0.2s; }
+  .lesson:nth-child(5) { animation-delay: 0.25s; }
+  .lesson:nth-child(6) { animation-delay: 0.3s; }
+  .lesson:nth-child(7) { animation-delay: 0.35s; }
+
+  .lesson:hover { border-color: var(--muted); }
+  .lesson.completed { border-color: var(--green); }
+
+  .lesson-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem 2rem;
+    cursor: pointer;
+    user-select: none;
+    background: var(--surface);
+  }
+
+  .lesson-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    min-width: 28px;
+  }
+
+  .lesson-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    flex: 1;
+  }
+
+  .lesson-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    padding: 3px 8px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    background: var(--border);
+    color: var(--muted);
+  }
+
+  .check-btn {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid var(--muted);
+    background: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-size: 0.8rem;
+    color: transparent;
+    flex-shrink: 0;
+  }
+
+  .completed .check-btn {
+    background: var(--green);
+    border-color: var(--green);
+    color: #000;
+  }
+
+  .lesson-body {
+    padding: 0 2rem 2rem 2rem;
+    display: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .lesson-body.open { display: block; }
+
+  .lesson-intro {
+    padding: 1.5rem 0 1rem;
+    color: #b0b0cc;
+    line-height: 1.75;
+    font-size: 0.95rem;
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 1.5rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.8;
+    overflow-x: auto;
+    margin: 1rem 0;
+    position: relative;
+  }
+
+  pre.broken { border-left-color: var(--red); }
+  pre.fixed  { border-left-color: var(--green); }
+
+  .code-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    margin-top: 1.25rem;
+  }
+
+  .code-label.bad    { color: var(--red); }
+  .code-label.good   { color: var(--green); }
+  .code-label.normal { color: var(--accent2); }
+
+  .kw  { color: #c084fc; }
+  .fn  { color: #60a5fa; }
+  .str { color: #f0e040; }
+  .cmt { color: #4b5563; }
+  .tag { color: #f87171; }
+  .attr{ color: #4ade80; }
+  .var { color: #e8e8f0; }
+
+  .experiment {
+    background: #0f1a12;
+    border: 1px solid #1a3a22;
+    border-radius: 4px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.25rem 0;
+  }
+
+  .experiment-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 0.75rem;
+  }
+
+  .experiment ul { list-style: none; padding: 0; }
+
+  .experiment li {
+    padding: 0.3rem 0;
+    font-size: 0.88rem;
+    color: #a0d4a8;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    line-height: 1.5;
+  }
+
+  .experiment li::before {
+    content: '→';
+    color: var(--green);
+    flex-shrink: 0;
+    margin-top: 0.05rem;
+  }
+
+  .final-challenge {
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 2.5rem;
+    margin-top: 3rem;
+    background: #12100a;
+    text-align: center;
+  }
+
+  .final-challenge h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .final-challenge p {
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.8;
+    max-width: 500px;
+    margin: 0 auto 1.5rem;
+  }
+
+  .spec-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 420px;
+    margin: 0 auto;
+    text-align: left;
+  }
+
+  .spec-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: #a08040;
+    background: #1a1500;
+    border: 1px solid #2a2000;
+    border-radius: 3px;
+    padding: 0.6rem 1rem;
+  }
+
+  .spec-item::before {
+    content: '◆';
+    color: var(--accent);
+    font-size: 0.5rem;
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 3rem 0 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .arrow {
+    color: var(--muted);
+    font-size: 0.7rem;
+    transition: transform 0.2s;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span>day01</span> / react-jsx-basics</div>
+  <div class="progress-bar" id="progressBar">
+    <div class="progress-dot" data-lesson="0"></div>
+    <div class="progress-dot" data-lesson="1"></div>
+    <div class="progress-dot" data-lesson="2"></div>
+    <div class="progress-dot" data-lesson="3"></div>
+    <div class="progress-dot" data-lesson="4"></div>
+    <div class="progress-dot" data-lesson="5"></div>
+    <div class="progress-dot" data-lesson="6"></div>
+  </div>
+</header>
+
+<div style="padding: 0 3rem;">
+  <div class="hero">
+    <div class="day-label">Day 01 · The Foundation</div>
+    <h1>Learn React<br/><em>JSX</em> Basics</h1>
+    <p class="hero-sub">7 lessons. Read → Type → Break → Fix.<br/>Never copy-paste. Mark each lesson done when you've finished experimenting.</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="section-label">Lessons</div>
+
+  <!-- LESSON 1 -->
+  <div class="lesson" id="lesson-0">
+    <div class="lesson-header" onclick="toggleLesson(0)">
+      <span class="lesson-num">01</span>
+      <span class="lesson-title">What is React & Why JSX?</span>
+      <span class="lesson-tag">concept</span>
+      <button class="check-btn" onclick="markDone(event, 0)" title="Mark done">✓</button>
+      <span class="arrow" id="arrow-0">▼</span>
+    </div>
+    <div class="lesson-body" id="body-0">
+      <p class="lesson-intro">React is a JavaScript library for building user interfaces. JSX is just a shorthand — your browser never sees JSX. Babel transforms it into plain <code>React.createElement()</code> calls behind the scenes.</p>
+
+      <div class="code-label normal">// JSX (what you write)</div>
+      <pre><span class="kw">const</span> <span class="var">element</span> = <span class="tag">&lt;h1&gt;</span>Hello, World!<span class="tag">&lt;/h1&gt;</span>;</pre>
+
+      <div class="code-label normal">// What Babel turns it into</div>
+      <pre><span class="kw">const</span> <span class="var">element</span> = <span class="fn">React.createElement</span>(
+  <span class="str">'h1'</span>,
+  <span class="kw">null</span>,
+  <span class="str">'Hello, World!'</span>
+);</pre>
+
+      <div class="code-label normal">// Both produce the exact same result</div>
+
+      <div class="experiment">
+        <div class="experiment-title">🧪 Experiment</div>
+        <ul>
+          <li>Open the browser console on any page and think: what would React.createElement actually return?</li>
+          <li>JSX is NOT HTML. It compiles to JavaScript. Remember this every time you write it.</li>
+          <li>Google "Babel REPL" and paste some JSX. Watch it transform live.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- LESSON 2 -->
+  <div class="lesson" id="lesson-1">
+    <div class="lesson-header" onclick="toggleLesson(1)">
+      <span class="lesson-num">02</span>
+      <span class="lesson-title">Setting Up with Vite</span>
+      <span class="lesson-tag">setup</span>
+      <button class="check-btn" onclick="markDone(event, 1)" title="Mark done">✓</button>
+      <span class="arrow" id="arrow-1">▼</span>
+    </div>
+    <div class="lesson-body" id="body-1">
+      <p class="lesson-intro">Vite is the fastest way to spin up a React project. It's much faster than the old Create React App. Run these commands in your terminal:</p>
+
+      <div class="code-label normal">// In your terminal — run this</div>
+      <pre><span class="fn">npm</span> create vite@latest day01-react-basics
+<span class="cmt"># Select: React → JavaScript</span>
+
+<span class="fn">cd</span> day01-react-basics
+<span class="fn">npm</span> install
+<span class="fn">npm</span> run dev</pre>
+
+      <div class="code-label normal">// Your project structure will look like</div>
+      <pre>day01-react-basics/
+├── src/
+│   ├── <span class="str">App.jsx</span>       <span class="cmt">← your main component</span>
+│   ├── <span class="str">main.jsx</span>      <span class="cmt">← entry point</span>
+│   └── <span class="str">index.css</span>
+├── index.html
+└── package.json</pre>
+
+      <div class="experiment">
+        <div class="experiment-title">🧪 Experiment</div>
+        <ul>
+          <li>After setup, open <code>src/main.jsx</code> and read it. Where does React attach to the HTML page?</li>
+          <li>Open <code>index.html</code> and find the <code>&lt;div id="root"&gt;</code>. That's where React lives.</li>
+          <li>Delete the project and scaffold it again from memory. This builds muscle memory.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- LESSON 3 -->
+  <div class="lesson" id="lesson-2">
+    <div class="lesson-header" onclick="toggleLesson(2)">
+      <span class="lesson-num">03</span>
+      <span class="lesson-title">Your First Component</span>
+      <span class="lesson-tag">core</span>
+      <button class="check-btn" onclick="markDone(event, 2)" title="Mark done">✓</button>
+      <span class="arrow" id="arrow-2">▼</span>
+    </div>
+    <div class="lesson-body" id="body-2">
+      <p class="lesson-intro">A component is just a JavaScript function that returns JSX. The function name MUST start with a capital letter — this is how React tells the difference between HTML tags and your custom components.</p>
+
+      <div class="code-label normal">// src/App.jsx — delete everything, write this from scratch</div>
+      <pre><span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;h1&gt;</span>My First React App<span class="tag">&lt;/h1&gt;</span>
+      <span class="tag">&lt;p&gt;</span>Hello from a component!<span class="tag">&lt;/p&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  );
+}
+
+<span class="kw">export default</span> App;</pre>
+
+      <div class="experiment">
+        <div class="experiment-title">🧪 Experiment</div>
+        <ul>
+          <li>Rename <code>App</code> to <code>app</code> (lowercase). See the error. Capital letter = required.</li>
+          <li>Remove the <code>export default</code> line. See what breaks.</li>
+          <li>Create a second function called <code>Header</code> in the same file and use it inside <code>App</code> like <code>&lt;Header /&gt;</code>.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- LESSON 4 -->
+  <div class="lesson" id="lesson-3">
+    <div class="lesson-header" onclick="toggleLesson(3)">
+      <span class="lesson-num">04</span>
+      <span class="lesson-title">JSX Rules — The Gotchas</span>
+      <span class="lesson-tag">rules</span>
+      <button class="check-btn" onclick="markDone(event, 3)" title="Mark done">✓</button>
+      <span class="arrow" id="arrow-3">▼</span>
+    </div>
+    <div class="lesson-body" id="body-3">
+      <p class="lesson-intro">JSX looks like HTML but has strict rules. Deliberately break each rule below, read the error, then fix it. You'll never forget them.</p>
+
+      <div class="code-label bad">❌ BROKEN — Two root elements (try this, read the error)</div>
+      <pre class="broken"><span class="kw">return</span> (
+  <span class="tag">&lt;h1&gt;</span>Title<span class="tag">&lt;/h1&gt;</span>
+  <span class="tag">&lt;p&gt;</span>Paragraph<span class="tag">&lt;/p&gt;</span>  <span class="cmt">// Error: Adjacent JSX elements</span>
+);</pre>
+
+      <div class="code-label good">✅ FIXED — Use a fragment</div>
+      <pre class="fixed"><span class="kw">return</span> (
+  <span class="tag">&lt;&gt;</span>
+    <span class="tag">&lt;h1&gt;</span>Title<span class="tag">&lt;/h1&gt;</span>
+    <span class="tag">&lt;p&gt;</span>Paragraph<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;/&gt;</span>
+);</pre>
+
+      <div class="code-label bad">❌ BROKEN — Using class instead of className</div>
+      <pre class="broken"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"container"</span><span class="tag">&gt;</span>  <span class="cmt">// Warning: use className</span></pre>
+
+      <div class="code-label good">✅ FIXED</div>
+      <pre class="fixed"><span class="tag">&lt;div</span> <span class="attr">className</span>=<span class="str">"container"</span><span class="tag">&gt;</span></pre>
+
+      <div class="code-label bad">❌ BROKEN — Unclosed self-closing tags</div>
+      <pre class="broken"><span class="tag">&lt;img</span> <span class="attr">src</span>=<span class="str">"photo.jpg"</span><span class="tag">&gt;</span>   <span class="cmt">// Error in JSX</span>
+<span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="str">"text"</span><span class="tag">&gt;</span>     <span class="cmt">// Error in JSX</span></pre>
+
+      <div class="code-label good">✅ FIXED — Self-close all void elements</div>
+      <pre class="fixed"><span class="tag">&lt;img</span> <span class="attr">src</span>=<span class="str">"photo.jpg"</span> <span class="tag">/&gt;</span>
+<span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="str">"text"</span> <span class="tag">/&gt;</span></pre>
+
+      <div class="experiment">
+        <div class="experiment-title">🧪 Experiment</div>
+        <ul>
+          <li>Also try: <code>for</code> attribute on a label → should be <code>htmlFor</code></li>
+          <li>Try: <code>onclick</code> → should be <code>onClick</code> (camelCase everything)</li>
+          <li>Every error message tells you exactly what's wrong. Read them carefully.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- LESSON 5 -->
+  <div class="lesson" id="lesson-4">
+    <div class="lesson-header" onclick="toggleLesson(4)">
+      <span class="lesson-num">05</span>
+      <span class="lesson-title">Dynamic Data with { }</span>
+      <span class="lesson-tag">core</span>
+      <button class="check-btn" onclick="markDone(event, 4)" title="Mark done">✓</button>
+      <span class="arrow" id="arrow-4">▼</span>
+    </div>
+    <div class="lesson-body" id="body-4">
+      <p class="lesson-intro">Curly braces <code>{ }</code> are your escape hatch from JSX back into JavaScript. Anything that evaluates to a value can go inside them.</p>
+
+      <div class="code-label normal">// Types of expressions you can use in { }</div>
+      <pre><span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">const</span> <span class="var">name</span> = <span class="str">"Maria"</span>;
+  <span class="kw">const</span> <span class="var">age</span> = 22;
+  <span class="kw">const</span> <span class="fn">greet</span> = () =&gt; <span class="str">"Hello!"</span>;
+  <span class="kw">const</span> <span class="var">isStudent</span> = <span class="kw">true</span>;
+
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;p&gt;</span>Name: {<span class="var">name</span>}<span class="tag">&lt;/p&gt;</span>               <span class="cmt">// variable</span>
+      <span class="tag">&lt;p&gt;</span>Age: {<span class="var">age</span>}<span class="tag">&lt;/p&gt;</span>                <span class="cmt">// number</span>
+      <span class="tag">&lt;p&gt;</span>Math: {<span class="var">age</span> * 2}<span class="tag">&lt;/p&gt;</span>           <span class="cmt">// expression</span>
+      <span class="tag">&lt;p&gt;</span>Fn: {<span class="fn">greet</span>()}<span class="tag">&lt;/p&gt;</span>             <span class="cmt">// function call</span>
+      <span class="tag">&lt;p&gt;</span>Role: {<span class="var">isStudent</span> ? <span class="str">"Student"</span> : <span class="str">"Other"</span>}<span class="tag">&lt;/p&gt;</span> <span class="cmt">// ternary</span>
+    <span class="tag">&lt;/div&gt;</span>
+  );
+}</pre>
+
+      <div class="experiment">
+        <div class="experiment-title">🧪 Experiment</div>
+        <ul>
+          <li>Try putting an <code>if</code> statement inside <code>{ }</code>. See why it fails. (Statements ≠ expressions)</li>
+          <li>Try rendering <code>{true}</code>, <code>{false}</code>, <code>{null}</code> — what shows up? Why?</li>
+          <li>Try rendering an object: <code>{{ name: "hi" }}</code>. Read the error.</li>
+          <li>Render today's date: <code>{new Date().toLocaleDateString()}</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- LESSON 6 -->
+  <div class="lesson" id="lesson-5">
+    <div class="lesson-header" onclick="toggleLesson(5)">
+      <span class="lesson-num">06</span>
+      <span class="lesson-title">Props — Passing Data to Components</span>
+      <span class="lesson-tag">core</span>
+      <button class="check-btn" onclick="markDone(event, 5)" title="Mark done">✓</button>
+      <span class="arrow" id="arrow-5">▼</span>
+    </div>
+    <div class="lesson-body" id="body-5">
+      <p class="lesson-intro">Props are how you pass data from a parent component to a child. They make components reusable. Think of them like arguments to a function — because that's exactly what they are.</p>
+
+      <div class="code-label normal">// Create a reusable UserCard component</div>
+      <pre><span class="kw">function</span> <span class="fn">UserCard</span>({ <span class="var">name</span>, <span class="var">age</span>, <span class="var">city</span> }) {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;div</span> <span class="attr">className</span>=<span class="str">"card"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;h2&gt;</span>{<span class="var">name</span>}<span class="tag">&lt;/h2&gt;</span>
+      <span class="tag">&lt;p&gt;</span>Age: {<span class="var">age</span>}<span class="tag">&lt;/p&gt;</span>
+      <span class="tag">&lt;p&gt;</span>City: {<span class="var">city</span>}<span class="tag">&lt;/p&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  );
+}
+
+<span class="cmt">// Use it multiple times with different data</span>
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;&gt;</span>
+      <span class="tag">&lt;UserCard</span> <span class="attr">name</span>=<span class="str">"Ana"</span> <span class="attr">age</span>={<span class="var">24</span>} <span class="attr">city</span>=<span class="str">"Manila"</span> <span class="tag">/&gt;</span>
+      <span class="tag">&lt;UserCard</span> <span class="attr">name</span>=<span class="str">"Ben"</span> <span class="attr">age</span>={<span class="var">30</span>} <span class="attr">city</span>=<span class="str">"Cebu"</span> <span class="tag">/&gt;</span>
+      <span class="tag">&lt;UserCard</span> <span class="attr">name</span>=<span class="str">"Cara"</span> <span class="attr">age</span>={<span class="var">19</span>} <span class="attr">city</span>=<span class="str">"Davao"</span> <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/&gt;</span>
+  );
+}</pre>
+
+      <div class="experiment">
+        <div class="experiment-title">🧪 Experiment</div>
+        <ul>
+          <li>Remove one prop (e.g. don't pass <code>city</code>). What renders? How do you handle missing props with a default?</li>
+          <li>Add a default: <code>function UserCard({ name, city = "Unknown" })</code></li>
+          <li>Try passing a non-string prop: <code>age={25}</code> vs <code>age="25"</code>. Are they different?</li>
+          <li>Can you pass a function as a prop? Try it.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- LESSON 7 -->
+  <div class="lesson" id="lesson-6">
+    <div class="lesson-header" onclick="toggleLesson(6)">
+      <span class="lesson-num">07</span>
+      <span class="lesson-title">Rendering Lists with .map()</span>
+      <span class="lesson-tag">core</span>
+      <button class="check-btn" onclick="markDone(event, 6)" title="Mark done">✓</button>
+      <span class="arrow" id="arrow-6">▼</span>
+    </div>
+    <div class="lesson-body" id="body-6">
+      <p class="lesson-intro">To render a list, use JavaScript's <code>.map()</code> to transform an array of data into an array of JSX elements. React requires a unique <code>key</code> prop on each item so it can track changes efficiently.</p>
+
+      <div class="code-label normal">// Array of data → array of JSX</div>
+      <pre><span class="kw">const</span> <span class="var">students</span> = [
+  { <span class="attr">id</span>: 1, <span class="attr">name</span>: <span class="str">"Ana"</span>, <span class="attr">grade</span>: <span class="str">"A"</span> },
+  { <span class="attr">id</span>: 2, <span class="attr">name</span>: <span class="str">"Ben"</span>, <span class="attr">grade</span>: <span class="str">"B+"</span> },
+  { <span class="attr">id</span>: 3, <span class="attr">name</span>: <span class="str">"Cara"</span>, <span class="attr">grade</span>: <span class="str">"A-"</span> },
+];
+
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;ul&gt;</span>
+      {<span class="var">students</span>.<span class="fn">map</span>((<span class="var">student</span>) =&gt; (
+        <span class="tag">&lt;li</span> <span class="attr">key</span>={<span class="var">student.id</span>}<span class="tag">&gt;</span>           <span class="cmt">// key is required!</span>
+          {<span class="var">student.name</span>} — {<span class="var">student.grade</span>}
+        <span class="tag">&lt;/li&gt;</span>
+      ))}
+    <span class="tag">&lt;/ul&gt;</span>
+  );
+}</pre>
+
+      <div class="experiment">
+        <div class="experiment-title">🧪 Experiment</div>
+        <ul>
+          <li>Remove the <code>key</code> prop. Read the warning. Now add it back.</li>
+          <li>Use the array index as key: <code>key={index}</code>. It works but why is it bad? (Hint: what if items reorder?)</li>
+          <li>Replace <code>&lt;li&gt;</code> with your <code>UserCard</code> component from Lesson 6. Combine both lessons!</li>
+          <li>Try filtering before mapping: <code>students.filter(s =&gt; s.grade === "A").map(...)</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Final Challenge -->
+  <div class="final-challenge">
+    <div class="day-label" style="text-align:center; margin-bottom: 0.5rem;">End of Day Challenge</div>
+    <h2>🏆 Student Directory</h2>
+    <p>Build this from scratch without looking at the lessons above. Use only what you've learned today.</p>
+    <div class="spec-list">
+      <div class="spec-item">An array of 5 students with name, grade, and subject</div>
+      <div class="spec-item">A StudentCard component that accepts those 3 props</div>
+      <div class="spec-item">Render all 5 cards using .map() with proper key props</div>
+      <div class="spec-item">Show today's date somewhere using new Date()</div>
+      <div class="spec-item">No copy-paste — type everything yourself</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const progress = JSON.parse(localStorage.getItem('day01-progress') || '{}');
+  const openState = JSON.parse(localStorage.getItem('day01-open') || '{"0": true}');
+
+  function saveProgress() {
+    localStorage.setItem('day01-progress', JSON.stringify(progress));
+  }
+
+  function saveOpenState() {
+    localStorage.setItem('day01-open', JSON.stringify(openState));
+  }
+
+  function toggleLesson(i) {
+    const body = document.getElementById('body-' + i);
+    const arrow = document.getElementById('arrow-' + i);
+    const isOpen = body.classList.contains('open');
+
+    body.classList.toggle('open', !isOpen);
+    arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+
+    openState[i] = !isOpen;
+    saveOpenState();
+  }
+
+  function markDone(e, i) {
+    e.stopPropagation();
+    const lesson = document.getElementById('lesson-' + i);
+    const dot = document.querySelector(`.progress-dot[data-lesson="${i}"]`);
+
+    progress[i] = !progress[i];
+    saveProgress();
+
+    lesson.classList.toggle('completed', progress[i]);
+    dot.classList.toggle('done', progress[i]);
+    dot.classList.toggle('active', !progress[i]);
+  }
+
+  Object.keys(progress).forEach(i => {
+    if (progress[i]) {
+      document.getElementById('lesson-' + i)?.classList.add('completed');
+      document.querySelector(`.progress-dot[data-lesson="${i}"]`)?.classList.add('done');
+    }
+  });
+
+  for (let i = 0; i < 7; i++) {
+    const shouldBeOpen = openState[i] === true;
+    const body = document.getElementById('body-' + i);
+    const arrow = document.getElementById('arrow-' + i);
+    if (shouldBeOpen && body) {
+      body.classList.add('open');
+      arrow.style.transform = 'rotate(180deg)';
+    }
+  }
+</script>
+</body>
+</html>
