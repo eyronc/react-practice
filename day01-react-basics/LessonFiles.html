@@ -30,6 +30,7 @@
     padding: 0;
   }
 
+  /* Header */
   header {
     border-bottom: 1px solid var(--border);
     padding: 2rem 3rem;
@@ -70,6 +71,7 @@
   .progress-dot.active { background: var(--accent); border-color: var(--accent); }
   .progress-dot.done { background: var(--green); border-color: var(--green); }
 
+  /* Hero */
   .hero {
     padding: 5rem 3rem 3rem;
     max-width: 900px;
@@ -99,18 +101,21 @@
 
   .hero-sub {
     color: var(--muted);
+    font-size: 1rem;
     max-width: 500px;
     line-height: 1.7;
     font-family: 'Space Mono', monospace;
     font-size: 0.8rem;
   }
 
+  /* Main layout */
   .container {
     max-width: 900px;
     margin: 0 auto;
     padding: 0 3rem 6rem;
   }
 
+  /* Lesson cards */
   .lesson {
     border: 1px solid var(--border);
     border-radius: 4px;
@@ -207,6 +212,7 @@
     font-size: 0.95rem;
   }
 
+  /* Code blocks */
   pre {
     background: var(--code-bg);
     border: 1px solid var(--border);
@@ -221,8 +227,13 @@
     position: relative;
   }
 
-  pre.broken { border-left-color: var(--red); }
-  pre.fixed  { border-left-color: var(--green); }
+  pre.broken {
+    border-left-color: var(--red);
+  }
+
+  pre.fixed {
+    border-left-color: var(--green);
+  }
 
   .code-label {
     font-family: 'Space Mono', monospace;
@@ -233,18 +244,20 @@
     margin-top: 1.25rem;
   }
 
-  .code-label.bad    { color: var(--red); }
-  .code-label.good   { color: var(--green); }
+  .code-label.bad { color: var(--red); }
+  .code-label.good { color: var(--green); }
   .code-label.normal { color: var(--accent2); }
 
-  .kw  { color: #c084fc; }
-  .fn  { color: #60a5fa; }
-  .str { color: #f0e040; }
-  .cmt { color: #4b5563; }
-  .tag { color: #f87171; }
-  .attr{ color: #4ade80; }
+  /* Colors in code */
+  .kw { color: #c084fc; }   /* keyword */
+  .fn { color: #60a5fa; }   /* function */
+  .str { color: #f0e040; }  /* string */
+  .cmt { color: #4b5563; }  /* comment */
+  .tag { color: #f87171; }  /* jsx tag */
+  .attr { color: #4ade80; } /* attribute */
   .var { color: #e8e8f0; }
 
+  /* Experiment box */
   .experiment {
     background: #0f1a12;
     border: 1px solid #1a3a22;
@@ -262,25 +275,46 @@
     margin-bottom: 0.75rem;
   }
 
-  .experiment ul { list-style: none; padding: 0; }
+  .experiment ul {
+    list-style: none;
+    padding: 0;
+  }
 
   .experiment li {
     padding: 0.3rem 0;
+    font-size: clamp(0.8rem, 2vw, 0.88rem);
+    color: #7ab87a;
+    display: block;
+    line-height: 1.7;
+  }
+
+  .experiment li::before { content: '→ '; color: var(--green); font-weight: bold; }
+
+  /* Challenge */
+  .challenge {
+    background: #1a1400;
+    border: 1px solid #3a3000;
+    border-radius: 4px;
+    padding: 1.25rem 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .challenge-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .challenge p {
     font-size: 0.88rem;
-    color: #a0d4a8;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.6rem;
-    line-height: 1.5;
+    color: #c8b860;
+    line-height: 1.6;
   }
 
-  .experiment li::before {
-    content: '→';
-    color: var(--green);
-    flex-shrink: 0;
-    margin-top: 0.05rem;
-  }
-
+  /* Final challenge */
   .final-challenge {
     border: 1px solid var(--accent);
     border-radius: 4px;
@@ -333,6 +367,7 @@
     font-size: 0.5rem;
   }
 
+  /* Divider */
   .section-label {
     font-family: 'Space Mono', monospace;
     font-size: 0.65rem;
@@ -352,10 +387,48 @@
     background: var(--border);
   }
 
+  /* Expand arrow */
   .arrow {
     color: var(--muted);
     font-size: 0.7rem;
     transition: transform 0.2s;
+  }
+
+  .lesson-body.open ~ .lesson-header .arrow,
+  .open-arrow { transform: rotate(180deg); }
+
+  /* ── Mobile ── */
+  @media (max-width: 680px) {
+    header { padding: 0.9rem 1rem; }
+    .hero { padding: 2rem 1rem 1.25rem; }
+    .container { padding: 0 1rem 4rem; }
+    .lesson-header { padding: 0.9rem 1rem; gap: 0.5rem; }
+    .lesson-tag { display: none; }
+    .lesson-body { padding: 0 1rem 1.5rem; }
+    .lesson-intro { font-size: 0.85rem; line-height: 1.7; }
+    pre { font-size: 0.65rem; padding: 0.85rem 0.9rem; line-height: 1.7; }
+    .code-label { font-size: 0.56rem; }
+    .experiment { padding: 0.85rem 0.9rem; }
+    .experiment li {
+    padding: 0.3rem 0;
+    font-size: clamp(0.8rem, 2vw, 0.88rem);
+    color: #7ab87a;
+    display: block;
+    line-height: 1.7;
+  }
+    .experiment li::before { content: '→ '; color: var(--green); font-weight: bold; }
+    .tip { padding: 0.85rem 0.9rem; }
+    .tip p { font-size: 0.82rem; }
+    .vtab { font-size: 0.55rem; padding: 0.4rem 0.6rem; letter-spacing: 0.04em; }
+    .variant-tabs { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+    .final-challenge { padding: 1.25rem 1rem; }
+    .spec-item { font-size: 0.67rem; padding: 0.5rem 0.75rem; }
+    code { font-size: 0.78em; word-break: break-word;
+    display: inline;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
   }
 </style>
 </head>
@@ -695,25 +768,18 @@
 </div>
 
 <script>
-  const progress = JSON.parse(localStorage.getItem('day01-progress') || '{}');
-  const openState = JSON.parse(localStorage.getItem('day01-open') || '{"0": true}');
+  const state = JSON.parse(localStorage.getItem('day01-progress') || '{}');
+  const openState = JSON.parse(localStorage.getItem('day01-open') || '{}');
 
-  function saveProgress() {
-    localStorage.setItem('day01-progress', JSON.stringify(progress));
-  }
-
-  function saveOpenState() {
-    localStorage.setItem('day01-open', JSON.stringify(openState));
-  }
+  function save() { localStorage.setItem('day01-progress', JSON.stringify(state)); }
+  function saveOpenState() { localStorage.setItem('day01-open', JSON.stringify(openState)); }
 
   function toggleLesson(i) {
     const body = document.getElementById('body-' + i);
     const arrow = document.getElementById('arrow-' + i);
     const isOpen = body.classList.contains('open');
-
     body.classList.toggle('open', !isOpen);
     arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
-
     openState[i] = !isOpen;
     saveOpenState();
   }
@@ -722,29 +788,25 @@
     e.stopPropagation();
     const lesson = document.getElementById('lesson-' + i);
     const dot = document.querySelector(`.progress-dot[data-lesson="${i}"]`);
-
-    progress[i] = !progress[i];
-    saveProgress();
-
-    lesson.classList.toggle('completed', progress[i]);
-    dot.classList.toggle('done', progress[i]);
-    dot.classList.toggle('active', !progress[i]);
+    state[i] = !state[i];
+    save();
+    lesson.classList.toggle('completed', state[i]);
+    dot.classList.toggle('done', state[i]);
+    dot.classList.toggle('active', !state[i]);
   }
 
-  Object.keys(progress).forEach(i => {
-    if (progress[i]) {
+  Object.keys(state).forEach(i => {
+    if (state[i]) {
       document.getElementById('lesson-' + i)?.classList.add('completed');
       document.querySelector(`.progress-dot[data-lesson="${i}"]`)?.classList.add('done');
     }
   });
 
   for (let i = 0; i < 7; i++) {
-    const shouldBeOpen = openState[i] === true;
-    const body = document.getElementById('body-' + i);
-    const arrow = document.getElementById('arrow-' + i);
-    if (shouldBeOpen && body) {
-      body.classList.add('open');
-      arrow.style.transform = 'rotate(180deg)';
+    if (openState[i] === true) {
+      document.getElementById('body-' + i)?.classList.add('open');
+      const arrow = document.getElementById('arrow-' + i);
+      if (arrow) arrow.style.transform = 'rotate(180deg)';
     }
   }
 </script>
