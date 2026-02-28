@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Day 03 — useEffect & Data</title>
+<link rel="icon" href="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" type="image/svg+xml" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0a0f; --surface: #12121c; --border: #1c1c2e;
+    --accent: #a78bfa; --accent2: #c4b5fd; --text: #ede9fe;
+    --muted: #6b6888; --code-bg: #0c0c18;
+    --green: #4ade80; --red: #f87171; --yellow: #fcd34d; --blue: #60a5fa;
+    --sidebar-w: 260px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { scroll-behavior:smooth; }
+  body { background:var(--bg); color:var(--text); font-family:'Syne',sans-serif; min-height:100vh; }
+
+  /* ── Sidebar ── */
+  .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:200; backdrop-filter:blur(2px); }
+  .sidebar-overlay.open { display:block; }
+  .sidebar { position:fixed; top:0; left:0; width:var(--sidebar-w); height:100vh; background:#0b0b16; border-right:1px solid var(--border); z-index:300; transform:translateX(-100%); transition:transform 0.28s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column; overflow-y:auto; }
+  .sidebar.open { transform:translateX(0); }
+  .sidebar-header { padding:1.25rem 1.5rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:#0b0b16; z-index:1; }
+  .sidebar-title { font-family:'Space Mono',monospace; font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--accent); }
+  .sidebar-close { background:none; border:none; cursor:pointer; color:var(--muted); font-size:1.1rem; line-height:1; padding:2px 4px; transition:color 0.15s; }
+  .sidebar-close:hover { color:var(--text); }
+  .sidebar-day { padding:1rem 1.5rem 0.4rem; }
+  .sidebar-day-label { font-family:'Space Mono',monospace; font-size:0.58rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem; }
+  .sidebar-day-label::after { content:''; flex:1; height:1px; background:var(--border); }
+  .sidebar-link { display:flex; align-items:center; gap:0.6rem; padding:0.45rem 0.75rem; border-radius:4px; font-family:'Space Mono',monospace; font-size:0.68rem; color:var(--muted); text-decoration:none; cursor:pointer; transition:all 0.15s; margin-bottom:0.15rem; border:none; background:none; width:100%; text-align:left; }
+  .sidebar-link:hover { background:var(--surface); color:var(--text); }
+  .sidebar-link.active { background:var(--accent); color:#fff; font-weight:700; }
+  .sidebar-link.day-link { font-size:0.72rem; color:var(--text); padding:0.55rem 0.75rem; }
+  .sidebar-link.day-link.current { color:var(--accent); }
+  .sidebar-num { font-size:0.55rem; color:var(--muted); min-width:18px; }
+  .sidebar-link.active .sidebar-num { color:#fff; }
+  .sidebar-done-dot { width:6px; height:6px; border-radius:50%; background:var(--green); margin-left:auto; flex-shrink:0; }
+
+  /* ── Header ── */
+  header { border-bottom:1px solid var(--border); padding:1.1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:rgba(10,10,15,0.97); backdrop-filter:blur(8px); z-index:100; gap:0.75rem; }
+  .header-left { display:flex; align-items:center; gap:0.75rem; }
+  .menu-btn { background:none; border:1px solid var(--border); color:var(--muted); cursor:pointer; width:32px; height:32px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:0.85rem; transition:all 0.15s; flex-shrink:0; }
+  .menu-btn:hover { border-color:var(--muted); color:var(--text); }
+  .logo { font-size:0.72rem; font-family:'Space Mono',monospace; color:var(--muted); letter-spacing:0.15em; text-transform:uppercase; }
+  .logo span { color:var(--accent); }
+  .progress-bar { display:flex; gap:5px; align-items:center; flex-wrap:wrap; }
+  .progress-dot { width:8px; height:8px; border-radius:50%; background:var(--border); border:1px solid var(--muted); cursor:pointer; transition:all 0.25s; }
+  .progress-dot.done { background:var(--accent); border-color:var(--accent); box-shadow:0 0 6px var(--accent); }
+
+  /* ── Hero ── */
+  .hero { padding:clamp(2.5rem,6vw,5rem) clamp(1.25rem,4vw,3rem) 2rem; max-width:900px; }
+  .day-label { font-family:'Space Mono',monospace; font-size:0.68rem; letter-spacing:0.3em; color:var(--accent); text-transform:uppercase; margin-bottom:1rem; }
+  h1 { font-size:clamp(2.2rem,7vw,5rem); font-weight:800; line-height:1; letter-spacing:-0.02em; margin-bottom:1.25rem; }
+  h1 em { font-style:normal; color:var(--accent); }
+  .hero-sub { color:var(--muted); font-family:'Space Mono',monospace; font-size:clamp(0.68rem,2vw,0.8rem); line-height:1.8; max-width:480px; }
+
+  /* ── Container ── */
+  .container { max-width:900px; margin:0 auto; padding:0 clamp(1.25rem,4vw,3rem) 2rem; }
+  .section-label { font-family:'Space Mono',monospace; font-size:0.65rem; letter-spacing:0.25em; text-transform:uppercase; color:var(--muted); margin:2.5rem 0 1.25rem; display:flex; align-items:center; gap:1rem; }
+  .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* ── Lesson card ── */
+  .lesson { border:1px solid var(--border); border-radius:6px; margin-bottom:1.5rem; overflow:hidden; transition:border-color 0.2s; animation:fadeUp 0.4s ease both; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+  .lesson:nth-child(1){animation-delay:.04s} .lesson:nth-child(2){animation-delay:.08s} .lesson:nth-child(3){animation-delay:.12s} .lesson:nth-child(4){animation-delay:.16s} .lesson:nth-child(5){animation-delay:.20s} .lesson:nth-child(6){animation-delay:.24s} .lesson:nth-child(7){animation-delay:.28s} .lesson:nth-child(8){animation-delay:.32s}
+  .lesson:hover { border-color:var(--muted); }
+  .lesson.completed { border-color:var(--green); }
+  .lesson.completed .lesson-header { background:#0e1a0e; }
+  .lesson-header { display:flex; align-items:center; gap:1rem; padding:1.5rem 2rem; cursor:pointer; user-select:none; background:var(--surface); flex-wrap:wrap; }
+  .lesson-num { font-family:'Space Mono',monospace; font-size:0.62rem; color:var(--muted); letter-spacing:0.1em; min-width:24px; flex-shrink:0; }
+  .lesson-title { font-size:clamp(0.9rem,2.5vw,1.05rem); font-weight:700; flex:1; min-width:120px; }
+  .lesson-tag { font-family:'Space Mono',monospace; font-size:0.58rem; letter-spacing:0.1em; padding:3px 7px; border-radius:2px; text-transform:uppercase; background:var(--border); color:var(--muted); flex-shrink:0; }
+  .lesson-tag.hook { background:#1a1a3a; color:var(--accent2); }
+  .lesson-tag.pattern { background:#2a1a3a; color:#e879f9; }
+  .lesson-tag.concept { background:#1a2a1a; color:var(--green); }
+  .lesson-tag.pitfall { background:#2a1a1a; color:var(--red); }
+  .check-btn { width:26px; height:26px; border-radius:50%; border:1.5px solid var(--muted); background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; font-size:0.75rem; color:transparent; flex-shrink:0; }
+  .completed .check-btn { background:var(--green); border-color:var(--green); color:#000; }
+  .arrow { color:var(--muted); font-size:0.65rem; transition:transform 0.2s; flex-shrink:0; }
+  .lesson-body { padding:0 2rem 2rem; display:none; border-top:1px solid var(--border); }
+  .lesson-body.open { display:block; }
+  .lesson-intro { padding:1.25rem 0 0.75rem; color:#b8b0d4; line-height:1.8; font-size:clamp(0.85rem,2vw,0.95rem); }
+
+  /* ── Variant tabs ── */
+  .variants { margin:1rem 0; }
+  .variant-tabs { display:flex; gap:0; flex-wrap:wrap; border-bottom:1px solid var(--border); }
+  .vtab { font-family:'Space Mono',monospace; font-size:0.62rem; letter-spacing:0.1em; text-transform:uppercase; padding:0.5rem 1rem; cursor:pointer; color:var(--muted); border:none; background:none; border-bottom:2px solid transparent; transition:all 0.15s; margin-bottom:-1px; }
+  .vtab:hover { color:var(--text); }
+  .vtab.active { color:var(--accent); border-bottom-color:var(--accent); }
+  .vpanel { display:none; }
+  .vpanel.active { display:block; }
+
+  /* ── Code ── */
+  pre { background:var(--code-bg); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:4px; padding:clamp(1rem,3vw,1.5rem); font-family:'Space Mono',monospace; font-size:clamp(0.65rem,1.8vw,0.78rem); line-height:1.85; overflow-x:auto; margin:0.75rem 0; -webkit-overflow-scrolling:touch; }
+  pre.broken { border-left-color:var(--red); }
+  pre.fixed { border-left-color:var(--green); }
+  pre.warn { border-left-color:var(--yellow); }
+  .code-label { font-family:'Space Mono',monospace; font-size:0.58rem; letter-spacing:0.15em; text-transform:uppercase; margin:1.1rem 0 0.4rem; }
+  .code-label.bad{color:var(--red)} .code-label.good{color:var(--green)} .code-label.normal{color:var(--blue)} .code-label.warn{color:var(--yellow)}
+  .kw{color:#a78bfa} .fn{color:#60a5fa} .str{color:#fcd34d} .cmt{color:#3d3d5c} .tag{color:#f87171} .attr{color:#4ade80} .var{color:#ede9fe} .num{color:#fb923c} .hk{color:#c4b5fd;font-style:italic}
+  code { font-family:'Space Mono',monospace; font-size:0.82em; background:#14142a; border:1px solid var(--border); border-radius:3px; padding:1px 5px; color:var(--accent2); display:inline; white-space:normal; word-break:break-word; overflow-wrap:anywhere; }
+
+  /* ── Callout boxes ── */
+  .experiment { background:#0a0a18; border:1px solid #22224a; border-radius:4px; padding:1.1rem 1.4rem; margin:1.1rem 0; }
+  .experiment-title { font-family:'Space Mono',monospace; font-size:0.62rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--accent); margin-bottom:0.6rem; }
+  .experiment ul { list-style:none; padding:0; }
+  .experiment li { padding:0.3rem 0; font-size:clamp(0.8rem,2vw,0.88rem); color:#a89cd0; display:block; line-height:1.7; }
+  .experiment li::before { content:'→ '; color:var(--accent); font-weight:bold; }
+  .tip { background:#100e1a; border:1px solid #3a2f00; border-radius:4px; padding:1rem 1.4rem; margin:1rem 0; }
+  .tip-title { font-family:'Space Mono',monospace; font-size:0.62rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--yellow); margin-bottom:0.5rem; }
+  .tip p { font-size:clamp(0.8rem,2vw,0.87rem); color:#c8b060; line-height:1.65; }
+  .warn-box { background:#1a0e0e; border:1px solid #4a1a1a; border-radius:4px; padding:1rem 1.4rem; margin:1rem 0; }
+  .warn-box-title { font-family:'Space Mono',monospace; font-size:0.62rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--red); margin-bottom:0.5rem; }
+  .warn-box p { font-size:clamp(0.8rem,2vw,0.87rem); color:#d08080; line-height:1.65; }
+
+  /* ── Compare ── */
+  .compare { display:flex; flex-direction:column; gap:1rem; margin:1rem 0; }
+  .compare-col h4 { font-family:'Space Mono',monospace; font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; margin-bottom:0.5rem; }
+  .compare-col.bad h4 { color:var(--red); }
+  .compare-col.good h4 { color:var(--green); }
+
+  /* ── Dependency diagram ── */
+  .dep-visual { background:var(--code-bg); border:1px solid var(--border); border-radius:4px; padding:1.25rem 1.5rem; margin:1rem 0; font-family:'Space Mono',monospace; font-size:0.72rem; }
+  .dep-row { display:flex; align-items:center; gap:0.75rem; margin-bottom:0.6rem; }
+  .dep-row:last-child { margin-bottom:0; }
+  .dep-arr { color:var(--accent); }
+  .dep-code { color:var(--accent2); background:#1a1a2e; padding:2px 8px; border-radius:3px; }
+  .dep-desc { color:var(--muted); font-size:0.65rem; }
+
+  /* ── Final challenge ── */
+  .final-challenge { border:1px solid var(--accent); border-radius:6px; padding:clamp(1.5rem,4vw,2.5rem); margin-top:3rem; background:#0c0b18; text-align:center; }
+  .final-challenge h2 { font-size:clamp(1.4rem,4vw,1.9rem); margin-bottom:0.75rem; letter-spacing:-0.02em; }
+  .final-challenge > p { color:var(--muted); font-family:'Space Mono',monospace; font-size:clamp(0.68rem,2vw,0.78rem); line-height:1.8; max-width:480px; margin:0 auto 1.5rem; }
+  .spec-list { display:flex; flex-direction:column; gap:0.45rem; max-width:440px; margin:0 auto; text-align:left; }
+  .spec-item { display:flex; align-items:flex-start; gap:0.7rem; font-family:'Space Mono',monospace; font-size:clamp(0.65rem,1.8vw,0.75rem); color:#9090c0; background:#0e0e1e; border:1px solid #1e1e3e; border-radius:3px; padding:0.55rem 0.9rem; line-height:1.5; }
+  .spec-item::before { content:'◆'; color:var(--accent); font-size:0.45rem; flex-shrink:0; margin-top:0.25rem; }
+
+  /* ── Prev / Next ── */
+  .day-nav { display:flex; justify-content:space-between; align-items:center; padding:clamp(1.5rem,4vw,2.5rem) clamp(1.25rem,4vw,3rem); border-top:1px solid var(--border); margin-top:1rem; gap:1rem; }
+  .day-nav-btn { display:flex; align-items:center; gap:0.6rem; padding:0.7rem 1.25rem; border:1px solid var(--border); border-radius:4px; background:var(--surface); color:var(--muted); font-family:'Space Mono',monospace; font-size:0.68rem; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; text-decoration:none; transition:all 0.15s; }
+  .day-nav-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .day-nav-btn.disabled { opacity:0.25; pointer-events:none; }
+  .day-nav-btn.next { margin-left:auto; }
+  .day-nav-center { font-family:'Space Mono',monospace; font-size:0.6rem; color:var(--muted); letter-spacing:0.15em; text-transform:uppercase; text-align:center; }
+
+  /* ── Mobile ── */
+  @media (max-width:680px) {
+    header { padding:0.9rem 1rem; }
+    .logo { font-size:0.6rem; letter-spacing:0.08em; }
+    .hero { padding:2rem 1rem 1.25rem; }
+    h1 { font-size:clamp(1.8rem,10vw,2.5rem) !important; word-break:break-word; }
+    .container { padding:0 1rem 2rem; }
+    div[style*="padding: 0"] { padding-left:1rem !important; padding-right:1rem !important; }
+    .lesson-header { padding:0.9rem 1rem; gap:0.5rem; }
+    .lesson-tag { display:none; }
+    .lesson-body { padding:0 1rem 1.5rem; }
+    pre { font-size:0.62rem; padding:0.75rem 0.8rem; overflow-x:auto; }
+    code { font-size:0.75em; word-break:break-word; overflow-wrap:anywhere; }
+    .vtab { font-size:0.55rem; padding:0.4rem 0.6rem; }
+    .variant-tabs { overflow-x:auto; flex-wrap:nowrap; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    .variant-tabs::-webkit-scrollbar { display:none; }
+    .day-nav { padding:1.25rem 1rem; flex-wrap:wrap; gap:0.5rem; }
+    .day-nav-btn { padding:0.55rem 0.9rem; font-size:0.62rem; flex:1; min-width:100px; justify-content:center; text-align:center; }
+    .day-nav-center { display:none; }
+    .dep-visual { font-size:0.6rem; padding:0.9rem 1rem; overflow-x:auto; }
+    .dep-row { flex-wrap:wrap; gap:0.4rem; }
+    .final-challenge { padding:1.25rem 1rem; }
+    .spec-list { max-width:100%; }
+    .hero-sub { font-size:0.7rem; }
+    .sidebar { width:min(var(--sidebar-w), 88vw); }
+    .compare { gap:0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <span class="sidebar-title">⚛ React Course</span>
+    <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+  </div>
+  <div style="padding:0.75rem 1rem 1.5rem;">
+    <div class="sidebar-day">
+      <div class="sidebar-day-label">Day 01</div>
+      <button class="sidebar-link day-link" onclick="goTo('../day01-react-basics/LessonFiles-Day1.html')">JSX Basics</button>
+    </div>
+    <div class="sidebar-day" style="margin-top:0.5rem;">
+      <div class="sidebar-day-label">Day 02</div>
+      <button class="sidebar-link day-link" onclick="goTo('../day02-state-and-events/LessonFiles-Day2.html')">State &amp; Events</button>
+    </div>
+    <div class="sidebar-day" style="margin-top:0.5rem;">
+      <div class="sidebar-day-label">Day 03</div>
+      <button class="sidebar-link day-link current" onclick="goTo('../day03-useeffect-and-data/LessonFiles-Day3.html')">useEffect &amp; Data</button>
+      <button class="sidebar-link active" id="sb-l0" onclick="jumpLesson(0)"><span class="sidebar-num">01</span> What is useEffect?</button>
+      <button class="sidebar-link" id="sb-l1" onclick="jumpLesson(1)"><span class="sidebar-num">02</span> Dependency Array</button>
+      <button class="sidebar-link" id="sb-l2" onclick="jumpLesson(2)"><span class="sidebar-num">03</span> Cleanup Function</button>
+      <button class="sidebar-link" id="sb-l3" onclick="jumpLesson(3)"><span class="sidebar-num">04</span> Fetching Data</button>
+      <button class="sidebar-link" id="sb-l4" onclick="jumpLesson(4)"><span class="sidebar-num">05</span> Loading & Error States</button>
+      <button class="sidebar-link" id="sb-l5" onclick="jumpLesson(5)"><span class="sidebar-num">06</span> Common Pitfalls</button>
+      <button class="sidebar-link" id="sb-l6" onclick="jumpLesson(6)"><span class="sidebar-num">07</span> Custom Hooks</button>
+      <button class="sidebar-link" id="sb-l7" onclick="jumpLesson(7)"><span class="sidebar-num">08</span> useEffect Rules</button>
+    </div>
+  </div>
+</aside>
+
+<!-- Header -->
+<header>
+  <div class="header-left">
+    <button class="menu-btn" onclick="openSidebar()">☰</button>
+    <div class="logo"><span>day03</span> / useeffect-and-data</div>
+  </div>
+  <div class="progress-bar" id="progressBar">
+    <div class="progress-dot" data-lesson="0"></div>
+    <div class="progress-dot" data-lesson="1"></div>
+    <div class="progress-dot" data-lesson="2"></div>
+    <div class="progress-dot" data-lesson="3"></div>
+    <div class="progress-dot" data-lesson="4"></div>
+    <div class="progress-dot" data-lesson="5"></div>
+    <div class="progress-dot" data-lesson="6"></div>
+    <div class="progress-dot" data-lesson="7"></div>
+  </div>
+</header>
+
+<div style="padding: 0 clamp(1.25rem,4vw,3rem);">
+  <div class="hero">
+    <div class="day-label">Day 03 · Side Effects & The Outside World</div>
+    <h1>useEffect<br/>&amp; <em>Data</em></h1>
+    <p class="hero-sub">8 lessons. Learn how React talks to the outside world —<br/>APIs, timers, subscriptions, and the rules that govern them all.</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="section-label">Lessons</div>
+
+  <!-- ══════════════════════════════
+       LESSON 1 — What is useEffect
+  ══════════════════════════════ -->
+  <div class="lesson" id="lesson-0">
+    <div class="lesson-header" onclick="toggleLesson(0)">
+      <span class="lesson-num">01</span>
+      <span class="lesson-title">What is useEffect? — Running Code After Render</span>
+      <span class="lesson-tag hook">hook</span>
+      <button class="check-btn" onclick="markDone(event,0)">✓</button>
+      <span class="arrow" id="arrow-0">▼</span>
+    </div>
+    <div class="lesson-body" id="body-0">
+      <p class="lesson-intro"><code>useEffect</code> lets you run code <em>after</em> React renders your component. Use it for anything that reaches outside React — fetching data, setting up timers, manually touching the DOM, subscribing to events.</p>
+
+      <div class="code-label normal">// The anatomy of useEffect</div>
+      <pre><span class="kw">import</span> { <span class="hk">useState</span>, <span class="hk">useEffect</span> } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">const</span> [<span class="var">count</span>, <span class="fn">setCount</span>] = <span class="hk">useState</span>(<span class="num">0</span>);
+
+  <span class="hk">useEffect</span>(() =&gt; {
+    <span class="cmt">// 1. This runs AFTER the component renders</span>
+    <span class="var">console</span>.<span class="fn">log</span>(<span class="str">'Component rendered! Count is:'</span>, <span class="var">count</span>);
+
+    <span class="cmt">// 2. Optionally return a cleanup function</span>
+    <span class="kw">return</span> () =&gt; {
+      <span class="var">console</span>.<span class="fn">log</span>(<span class="str">'Cleaning up...'</span>);
+    };
+  }, [<span class="var">count</span>]); <span class="cmt">// 3. Dependency array — when to re-run</span>
+
+  <span class="kw">return</span> <span class="tag">&lt;button</span> <span class="attr">onClick</span>={() =&gt; <span class="fn">setCount</span>(<span class="var">c</span> =&gt; <span class="var">c</span> + <span class="num">1</span>)}<span class="tag">&gt;</span>Count: {<span class="var">count</span>}<span class="tag">&lt;/button&gt;</span>;
+}</pre>
+
+      <div class="tip">
+        <div class="tip-title">💡 Mental model</div>
+        <p>Think of <code>useEffect</code> as: "After React paints the screen, <em>then</em> do this side effect." It's React's way of staying in control of the render cycle while still letting you interact with the outside world.</p>
+      </div>
+
+      <div class="code-label normal">// All 3 forms — based on the dependency array</div>
+      <pre><span class="cmt">// Form 1: Runs after EVERY render</span>
+<span class="hk">useEffect</span>(() =&gt; {
+  <span class="var">console</span>.<span class="fn">log</span>(<span class="str">'runs every render'</span>);
+}); <span class="cmt">// ← no array at all</span>
+
+<span class="cmt">// Form 2: Runs ONCE on mount only</span>
+<span class="hk">useEffect</span>(() =&gt; {
+  <span class="var">console</span>.<span class="fn">log</span>(<span class="str">'runs once on mount'</span>);
+}, []); <span class="cmt">// ← empty array</span>
+
+<span class="cmt">// Form 3: Runs when specific values change</span>
+<span class="hk">useEffect</span>(() =&gt; {
+  <span class="var">console</span>.<span class="fn">log</span>(<span class="str">'runs when userId changes'</span>);
+}, [<span class="var">userId</span>]); <span class="cmt">// ← array with dependencies</span></pre>
+
+      <div class="experiment">
+        <div class="experiment-title">🧪 Experiment</div>
+        <ul>
+          <li>Add a <code>useEffect</code> with no array. Click a button to update state. How many times does the console log fire?</li>
+          <li>Add <code>[]</code> as the second arg. Click the button again. What changes?</li>
+          <li>Add a state variable to the array. When does the effect run now?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       LESSON 2 — Dependency Array
+  ══════════════════════════════ -->
+  <div class="lesson" id="lesson-1">
+    <div class="lesson-header" onclick="toggleLesson(1)">
+      <span class="lesson-num">02</span>
+      <span class="lesson-title">The Dependency Array — Controlling When Effects Run</span>
+      <span class="lesson-tag hook">hook</span>
+      <button class="check-btn" onclick="markDone(event,1)">✓</button>
+      <span class="arrow" id="arrow-1">▼</span>
+    </div>
+    <div class="lesson-body" id="body-1">
+      <p class="lesson-intro">The dependency array is the most important part of <code>useEffect</code>. It tells React: "Only re-run this effect if one of these values changed since last render."</p>
+
+      <div class="dep-visual">
+        <div class="dep-row"><span class="dep-code">useEffect(fn)</span> <span class="dep-arr">→</span> <span class="dep-desc">Runs after every render</span></div>
+        <div class="dep-row"><span class="dep-code">useEffect(fn, [])</span> <span class="dep-arr">→</span> <span class="dep-desc">Runs once on mount only</span></div>
+        <div class="dep-row"><span class="dep-code">useEffect(fn, [a])</span> <span class="dep-arr">→</span> <span class="dep-desc">Runs on mount + when <code>a</code> changes</span></div>
+        <div class="dep-row"><span class="dep-code">useEffect(fn, [a,b])</span> <span class="dep-arr">→</span> <span class="dep-desc">Runs on mount + when <code>a</code> OR <code>b</code> changes</span></div>
+      </div>
+
+      <div class="code-label normal">// Practical example — sync document title with state</div>
+      <pre><span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">const</span> [<span class="var">name</span>, <span class="fn">setName</span>] = <span class="hk">useState</span>(<span class="str">''</span>);
+  <span class="kw">const</span> [<span class="var">count</span>, <span class="fn">setCount</span>] = <span class="hk">useState</span>(<span class="num">0</span>);
+
+  <span class="cmt">// Only runs when name changes</span>
+  <span class="hk">useEffect</span>(() =&gt; {
+    <span class="var">document</span>.<span class="var">title</span> = <span class="str">`Hello, </span>${<span class="var">name</span>}<span class="str">!`</span>;
+  }, [<span class="var">name</span>]);
+
+  <span class="cmt">// Only runs when count changes</span>
+  <span class="hk">useEffect</span>(() =&gt; {
+    <span class="var">document</span>.<span class="var">title</span> = <span class="str">`Count: </span>${<span class="var">count</span>}<span class="str">`</span>;
+  }, [<span class="var">count</span>]);
+
+  <span class="cmt">// You can have multiple useEffects in one component!</span>
+}</pre>
+
+      <div class="warn-box">
+        <div class="warn-box-title">⚠️ The Golden Rule</div>
+        <p>Every value from your component that you use inside the effect MUST be in the dependency array. If you read <code>userId</code> inside the effect, it goes in the array. Missing dependencies = stale data bugs.</p>
+      </div>
+
+      <div class="experiment">
+        <div class="experiment-title">🧪 Experiment</div>
+        <ul>
+          <li>Use <code>useEffect</code> to update <code>document.title</code> whenever a search input changes.</li>
+          <li>Try two separate <code>useEffect</code> calls — one for each piece of state. They run independently.</li>
+          <li>Intentionally leave a dependency OUT of the array. Notice the stale value bug.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       LESSON 3 — Cleanup
+  ══════════════════════════════ -->
+  <div class="lesson" id="lesson-2">
+    <div class="lesson-header" onclick="toggleLesson(2)">
+      <span class="lesson-num">03</span>
+      <span class="lesson-title">Cleanup — Preventing Memory Leaks</span>
+      <span class="lesson-tag concept">concept</span>
+      <button class="check-btn" onclick="markDone(event,2)">✓</button>
+      <span class="arrow" id="arrow-2">▼</span>
+    </div>
+    <div class="lesson-body" id="body-2">
+      <p class="lesson-intro">When your effect sets up something ongoing — a timer, an event listener, a WebSocket — you must clean it up when the component unmounts, or you'll leak memory and cause bugs.</p>
+
+      <div class="variants">
+        <div class="variant-tabs">
+          <button class="vtab active" onclick="switchTab(event,'cl1')">Timer</button>
+          <button class="vtab" onclick="switchTab(event,'cl2')">Event Listener</button>
+          <button class="vtab" onclick="switchTab(event,'cl3')">Fetch (Abort)</button>
+        </div>
+        <div id="cl1" class="vpanel active">
+          <div class="code-label normal">// Setting up and clearing an interval</div>
+          <pre><span class="kw">function</span> <span class="fn">Timer</span>() {
+  <span class="kw">const</span> [<span class="var">seconds</span>, <span class="fn">setSeconds</span>] = <span class="hk">useState</span>(<span class="num">0</span>);
+
+  <span class="hk">useEffect</span>(() =&gt; {
+    <span class="cmt">// Start the interval</span>
+    <span class="kw">const</span> <span class="var">interval</span> = <span class="fn">setInterval</span>(() =&gt; {
+      <span class="fn">setSeconds</span>(<span class="var">prev</span> =&gt; <span class="var">prev</span> + <span class="num">1</span>); <span class="cmt">// functional updater!</span>
+    }, <span class="num">1000</span>);
+
+    <span class="cmt">// Return cleanup — runs when component unmounts</span>
+    <span class="kw">return</span> () =&gt; <span class="fn">clearInterval</span>(<span class="var">interval</span>);
+  }, []); <span class="cmt">// empty array = set up once, clear on unmount</span>
+
+  <span class="kw">return</span> <span class="tag">&lt;p&gt;</span>Elapsed: {<span class="var">seconds</span>}s<span class="tag">&lt;/p&gt;</span>;
+}</pre>
+        </div>
+        <div id="cl2" class="vpanel">
+          <div class="code-label normal">// Adding and removing window event listeners</div>
+          <pre><span class="kw">function</span> <span class="fn">MouseTracker</span>() {
+  <span class="kw">const</span> [<span class="var">pos</span>, <span class="fn">setPos</span>] = <span class="hk">useState</span>({ <span class="attr">x</span>: <span class="num">0</span>, <span class="attr">y</span>: <span class="num">0</span> });
+
+  <span class="hk">useEffect</span>(() =&gt; {
+    <span class="kw">const</span> <span class="fn">handleMove</span> = (<span class="var">e</span>) =&gt; {
+      <span class="fn">setPos</span>({ <span class="attr">x</span>: <span class="var">e</span>.<span class="var">clientX</span>, <span class="attr">y</span>: <span class="var">e</span>.<span class="var">clientY</span> });
+    };
+
+    <span class="var">window</span>.<span class="fn">addEventListener</span>(<span class="str">'mousemove'</span>, <span class="fn">handleMove</span>);
+
+    <span class="cmt">// Remove it when component unmounts — always!</span>
+    <span class="kw">return</span> () =&gt; {
+      <span class="var">window</span>.<span class="fn">removeEventListener</span>(<span class="str">'mousemove'</span>, <span class="fn">handleMove</span>);
+    };
+  }, []);
+
+  <span class="kw">return</span> <span class="tag">&lt;p&gt;</span>Mouse: {<span class="var">pos</span>.<span class="var">x</span>}, {<span class="var">pos</span>.<span class="var">y</span>}<span class="tag">&lt;/p&gt;</span>;
+}</pre>
+        </div>
+        <div id="cl3" class="vpanel">
+          <div class="code-label normal">// Cancelling a fetch request on cleanup</div>
+          <pre><span class="hk">useEffect</span>(() =&gt; {
+  <span class="cmt">// AbortController lets you cancel in-flight requests</span>
+  <span class="kw">const</span> <span class="var">controller</span> = <span class="kw">new</span> <span class="fn">AbortController</span>();
+
+  <span class="fn">fetch</span>(<span class="str">`/api/users/</span>${<span class="var">userId</span>}<span class="str">`</span>, {
+    <span class="attr">signal</span>: <span class="var">controller</span>.<span class="var">signal</span>,
+  })
+    .<span class="fn">then</span>(<span class="var">res</span> =&gt; <span class="var">res</span>.<span class="fn">json</span>())
+    .<span class="fn">then</span>(<span class="var">data</span> =&gt; <span class="fn">setUser</span>(<span class="var">data</span>))
+    .<span class="fn">catch</span>(<span class="var">err</span> =&gt; {
+      <span class="cmt">// Ignore abort errors — they're expected</span>
+      <span class="kw">if</span> (<span class="var">err</span>.<span class="var">name</span> !== <span class="str">'AbortError'</span>) <span class="fn">setError</span>(<span class="var">err</span>);
+    });
+
+  <span class="cmt">// Cancel the request if userId changes or unmounts</span>
+  <span class="kw">return</span> () =&gt; <span class="var">controller</span>.<span class="fn">abort</span>();
+}, [<span class="var">userId</span>]);</pre>
+        </div>
+      </div>
+
+      <div class="experiment">
+        <div class="experiment-title">🧪 Experiment</div>
+        <ul>
+          <li>Build a stopwatch with start/stop. Use <code>setInterval</code> with cleanup.</li>
+          <li>Mount and unmount a component that has a timer. Check the console — does the timer stop?</li>
+          <li>Remove the cleanup return. Mount and unmount 5 times. Watch console — timers stack up. That's a memory leak.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       LESSON 4 — Fetching Data
+  ══════════════════════════════ -->
+  <div class="lesson" id="lesson-3">
+    <div class="lesson-header" onclick="toggleLesson(3)">
+      <span class="lesson-num">04</span>
+      <span class="lesson-title">Fetching Data — The Full Pattern</span>
+      <span class="lesson-tag pattern">pattern</span>
+      <button class="check-btn" onclick="markDone(event,3)">✓</button>
+      <span class="arrow" id="arrow-3">▼</span>
+    </div>
+    <div class="lesson-body" id="body-3">
+      <p class="lesson-intro">Data fetching is the most common <code>useEffect</code> use case. Here's the complete, production-ready pattern — with loading state, error handling, and cleanup.</p>
+
+      <div class="variants">
+        <div class="variant-tabs">
+          <button class="vtab active" onclick="switchTab(event,'f1')">Basic fetch</button>
+          <button class="vtab" onclick="switchTab(event,'f2')">async/await</button>
+          <button class="vtab" onclick="switchTab(event,'f3')">Fetch on ID change</button>
+        </div>
+        <div id="f1" class="vpanel active">
+          <div class="code-label normal">// Minimal fetch pattern — Promise chain</div>
+          <pre><span class="kw">function</span> <span class="fn">UserList</span>() {
+  <span class="kw">const</span> [<span class="var">users</span>, <span class="fn">setUsers</span>] = <span class="hk">useState</span>([]);
+  <span class="kw">const</span> [<span class="var">loading</span>, <span class="fn">setLoading</span>] = <span class="hk">useState</span>(<span class="kw">true</span>);
+  <span class="kw">const</span> [<span class="var">error</span>, <span class="fn">setError</span>] = <span class="hk">useState</span>(<span class="kw">null</span>);
+
+  <span class="hk">useEffect</span>(() =&gt; {
+    <span class="fn">fetch</span>(<span class="str">'https://jsonplaceholder.typicode.com/users'</span>)
+      .<span class="fn">then</span>(<span class="var">res</span> =&gt; {
+        <span class="kw">if</span> (!<span class="var">res</span>.<span class="var">ok</span>) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'Network error'</span>);
+        <span class="kw">return</span> <span class="var">res</span>.<span class="fn">json</span>();
+      })
+      .<span class="fn">then</span>(<span class="var">data</span> =&gt; {
+        <span class="fn">setUsers</span>(<span class="var">data</span>);
+        <span class="fn">setLoading</span>(<span class="kw">false</span>);
+      })
+      .<span class="fn">catch</span>(<span class="var">err</span> =&gt; {
+        <span class="fn">setError</span>(<span class="var">err</span>.<span class="var">message</span>);
+        <span class="fn">setLoading</span>(<span class="kw">false</span>);
+      });
+  }, []);
+
+  <span class="kw">if</span> (<span class="var">loading</span>) <span class="kw">return</span> <span class="tag">&lt;p&gt;</span>Loading...<span class="tag">&lt;/p&gt;</span>;
+  <span class="kw">if</span> (<span class="var">error</span>) <span class="kw">return</span> <span class="tag">&lt;p&gt;</span>Error: {<span class="var">error</span>}<span class="tag">&lt;/p&gt;</span>;
+  <span class="kw">return</span> <span class="tag">&lt;ul&gt;</span>{<span class="var">users</span>.<span class="fn">map</span>(<span class="var">u</span> =&gt; <span class="tag">&lt;li</span> <span class="attr">key</span>={<span class="var">u</span>.<span class="var">id</span>}<span class="tag">&gt;</span>{<span class="var">u</span>.<span class="var">name</span>}<span class="tag">&lt;/li&gt;</span>)}<span class="tag">&lt;/ul&gt;</span>;
+}</pre>
+        </div>
+        <div id="f2" class="vpanel">
+          <div class="code-label normal">// async/await — important: you can't make the effect itself async</div>
+          <pre><span class="hk">useEffect</span>(() =&gt; {
+  <span class="cmt">// ❌ Can't do this: useEffect(async () => { ... }, [])</span>
+  <span class="cmt">// ✅ Define async function INSIDE, then call it</span>
+
+  <span class="kw">const</span> <span class="fn">fetchUsers</span> = <span class="kw">async</span> () =&gt; {
+    <span class="kw">try</span> {
+      <span class="fn">setLoading</span>(<span class="kw">true</span>);
+      <span class="kw">const</span> <span class="var">res</span> = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'https://jsonplaceholder.typicode.com/users'</span>);
+      <span class="kw">if</span> (!<span class="var">res</span>.<span class="var">ok</span>) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'Network error'</span>);
+      <span class="kw">const</span> <span class="var">data</span> = <span class="kw">await</span> <span class="var">res</span>.<span class="fn">json</span>();
+      <span class="fn">setUsers</span>(<span class="var">data</span>);
+    } <span class="kw">catch</span> (<span class="var">err</span>) {
+      <span class="fn">setError</span>(<span class="var">err</span>.<span class="var">message</span>);
+    } <span class="kw">finally</span> {
+      <span class="fn">setLoading</span>(<span class="kw">false</span>);
+    }
+  };
+
+  <span class="fn">fetchUsers</span>(); <span class="cmt">// call it immediately</span>
+}, []);</pre>
+        </div>
+        <div id="f3" class="vpanel">
+          <div class="code-label normal">// Refetch whenever a dependency (userId) changes</div>
+          <pre><span class="kw">function</span> <span class="fn">UserProfile</span>({ <span class="var">userId</span> }) {
+  <span class="kw">const</span> [<span class="var">user</span>, <span class="fn">setUser</span>] = <span class="hk">useState</span>(<span class="kw">null</span>);
+  <span class="kw">const</span> [<span class="var">loading</span>, <span class="fn">setLoading</span>] = <span class="hk">useState</span>(<span class="kw">true</span>);
+
+  <span class="hk">useEffect</span>(() =&gt; {
+    <span class="fn">setLoading</span>(<span class="kw">true</span>); <span class="cmt">// reset loading on each fetch</span>
+    <span class="kw">const</span> <span class="var">controller</span> = <span class="kw">new</span> <span class="fn">AbortController</span>();
+
+    <span class="fn">fetch</span>(<span class="str">`https://jsonplaceholder.typicode.com/users/</span>${<span class="var">userId</span>}<span class="str">`</span>, {
+      <span class="attr">signal</span>: <span class="var">controller</span>.<span class="var">signal</span>,
+    })
+      .<span class="fn">then</span>(<span class="var">r</span> =&gt; <span class="var">r</span>.<span class="fn">json</span>())
+      .<span class="fn">then</span>(<span class="var">data</span> =&gt; { <span class="fn">setUser</span>(<span class="var">data</span>); <span class="fn">setLoading</span>(<span class="kw">false</span>); })
+      .<span class="fn">catch</span>(<span class="var">e</span> =&gt; { <span class="kw">if</span> (<span class="var">e</span>.<span class="var">name</span> !== <span class="str">'AbortError'</span>) <span class="fn">setLoading</span>(<span class="kw">false</span>); });
+
+    <span class="kw">return</span> () =&gt; <span class="var">controller</span>.<span class="fn">abort</span>(); <span class="cmt">// cleanup!</span>
+  }, [<span class="var">userId</span>]); <span class="cmt">// re-fetch when userId changes</span>
+
+  <span class="kw">if</span> (<span class="var">loading</span>) <span class="kw">return</span> <span class="tag">&lt;p&gt;</span>Loading...<span class="tag">&lt;/p&gt;</span>;
+  <span class="kw">return</span> <span class="tag">&lt;h2&gt;</span>{<span class="var">user</span>?.<span class="var">name</span>}<span class="tag">&lt;/h2&gt;</span>;
+}</pre>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="tip-title">🌐 Free test API</div>
+        <p>Use <code>https://jsonplaceholder.typicode.com</code> — a free fake REST API for practice. Try <code>/users</code>, <code>/posts</code>, <code>/todos</code>.</p>
+      </div>
+
+      <div class="experiment">
+        <div class="experiment-title">🧪 Experiment</div>
+        <ul>
+          <li>Fetch <code>https://jsonplaceholder.typicode.com/users</code> and render a list of names.</li>
+          <li>Add a number input that changes the user id. Watch the profile update on every change.</li>
+          <li>Slow your network in DevTools → Network tab → Throttle. Watch the loading state work.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       LESSON 5 — Loading & Error
+  ══════════════════════════════ -->
+  <div class="lesson" id="lesson-4">
+    <div class="lesson-header" onclick="toggleLesson(4)">
+      <span class="lesson-num">05</span>
+      <span class="lesson-title">Loading & Error States — The Complete UI Pattern</span>
+      <span class="lesson-tag pattern">pattern</span>
+      <button class="check-btn" onclick="markDone(event,4)">✓</button>
+      <span class="arrow" id="arrow-4">▼</span>
+    </div>
+    <div class="lesson-body" id="body-4">
+      <p class="lesson-intro">Every async operation has three possible states: loading, success, and error. Model all three explicitly in state — never assume success.</p>
+
+      <div class="code-label normal">// The three-state pattern — always use all three</div>
+      <pre><span class="kw">function</span> <span class="fn">DataComponent</span>() {
+  <span class="kw">const</span> [<span class="var">data</span>, <span class="fn">setData</span>]       = <span class="hk">useState</span>(<span class="kw">null</span>);
+  <span class="kw">const</span> [<span class="var">loading</span>, <span class="fn">setLoading</span>] = <span class="hk">useState</span>(<span class="kw">true</span>);  <span class="cmt">// start as true!</span>
+  <span class="kw">const</span> [<span class="var">error</span>, <span class="fn">setError</span>]     = <span class="hk">useState</span>(<span class="kw">null</span>);
+
+  <span class="hk">useEffect</span>(() =&gt; {
+    <span class="kw">const</span> <span class="fn">load</span> = <span class="kw">async</span> () =&gt; {
+      <span class="kw">try</span> {
+        <span class="fn">setLoading</span>(<span class="kw">true</span>);
+        <span class="fn">setError</span>(<span class="kw">null</span>);    <span class="cmt">// clear previous error</span>
+        <span class="kw">const</span> <span class="var">res</span> = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'/api/data'</span>);
+        <span class="kw">if</span> (!<span class="var">res</span>.<span class="var">ok</span>) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">`HTTP </span>${<span class="var">res</span>.<span class="var">status</span>}<span class="str">`</span>);
+        <span class="fn">setData</span>(<span class="kw">await</span> <span class="var">res</span>.<span class="fn">json</span>());
+      } <span class="kw">catch</span> (<span class="var">e</span>) {
+        <span class="fn">setError</span>(<span class="var">e</span>.<span class="var">message</span>);
+      } <span class="kw">finally</span> {
+        <span class="fn">setLoading</span>(<span class="kw">false</span>); <span class="cmt">// always stop loading</span>
+      }
+    };
+    <span class="fn">load</span>();
+  }, []);
+
+  <span class="cmt">// Early returns — handle each state</span>
+  <span class="kw">if</span> (<span class="var">loading</span>) <span class="kw">return</span> <span class="tag">&lt;p</span> <span class="attr">className</span>=<span class="str">"loading"</span><span class="tag">&gt;</span>⏳ Loading...<span class="tag">&lt;/p&gt;</span>;
+  <span class="kw">if</span> (<span class="var">error</span>)   <span class="kw">return</span> <span class="tag">&lt;p</span> <span class="attr">className</span>=<span class="str">"error"</span><span class="tag">&gt;</span>❌ Error: {<span class="var">error</span>}<span class="tag">&lt;/p&gt;</span>;
+  <span class="kw">if</span> (!<span class="var">data</span>)   <span class="kw">return</span> <span class="tag">&lt;p&gt;</span>No data found.<span class="tag">&lt;/p&gt;</span>;
+
+  <span class="kw">return</span> <span class="tag">&lt;div&gt;</span>{<span class="cmt">/* render data */</span>}<span class="tag">&lt;/div&gt;</span>;
+}</pre>
+
+      <div class="experiment">
+        <div class="experiment-title">🧪 Experiment</div>
+        <ul>
+          <li>Fetch from a URL that doesn't exist. Does your error state catch it?</li>
+          <li>Add a "Retry" button that re-triggers the fetch. Hint: use a <code>retry</code> state counter in the dependency array.</li>
+          <li>Try fetching <code>https://httpstat.us/500</code> — a URL that always returns a 500 error. Test your error handling.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       LESSON 6 — Common Pitfalls
+  ══════════════════════════════ -->
+  <div class="lesson" id="lesson-5">
+    <div class="lesson-header" onclick="toggleLesson(5)">
+      <span class="lesson-num">06</span>
+      <span class="lesson-title">Common Pitfalls — Bugs Everyone Hits</span>
+      <span class="lesson-tag pitfall">pitfall</span>
+      <button class="check-btn" onclick="markDone(event,5)">✓</button>
+      <span class="arrow" id="arrow-5">▼</span>
+    </div>
+    <div class="lesson-body" id="body-5">
+      <p class="lesson-intro">These are the four most common <code>useEffect</code> bugs. Every React developer hits all of them. Know them now so you recognize them when they happen.</p>
+
+      <div class="code-label bad">❌ PITFALL 1 — Infinite loop</div>
+      <pre class="broken"><span class="cmt">// Setting state inside an effect with no deps / wrong deps</span>
+<span class="kw">const</span> [<span class="var">data</span>, <span class="fn">setData</span>] = <span class="hk">useState</span>([]);
+
+<span class="hk">useEffect</span>(() =&gt; {
+  <span class="fn">setData</span>([...<span class="var">data</span>, <span class="str">'new item'</span>]); <span class="cmt">// sets data →</span>
+}, [<span class="var">data</span>]); <span class="cmt">// → data changed → effect runs → sets data → ♾️</span></pre>
+      <div class="code-label good">✅ Fix — use a ref or restructure logic</div>
+      <pre class="fixed"><span class="hk">useEffect</span>(() =&gt; {
+  <span class="fn">setData</span>([<span class="str">'initial item'</span>]); <span class="cmt">// only set once on mount</span>
+}, []); <span class="cmt">// empty array breaks the loop</span></pre>
+
+      <div class="code-label bad">❌ PITFALL 2 — Async effect directly</div>
+      <pre class="broken"><span class="cmt">// useEffect does NOT support async directly</span>
+<span class="hk">useEffect</span>(<span class="kw">async</span> () =&gt; {       <span class="cmt">// ← BAD</span>
+  <span class="kw">const</span> <span class="var">data</span> = <span class="kw">await</span> <span class="fn">fetchData</span>();
+}, []);</pre>
+      <div class="code-label good">✅ Fix — define async inside, call it</div>
+      <pre class="fixed"><span class="hk">useEffect</span>(() =&gt; {
+  <span class="kw">const</span> <span class="fn">run</span> = <span class="kw">async</span> () =&gt; {
+    <span class="kw">const</span> <span class="var">data</span> = <span class="kw">await</span> <span class="fn">fetchData</span>();
+  };
+  <span class="fn">run</span>();
+}, []);</pre>
+
+      <div class="code-label bad">❌ PITFALL 3 — Stale closure (missing dep)</div>
+      <pre class="broken"><span class="kw">const</span> [<span class="var">count</span>, <span class="fn">setCount</span>] = <span class="hk">useState</span>(<span class="num">0</span>);
+
+<span class="hk">useEffect</span>(() =&gt; {
+  <span class="kw">const</span> <span class="var">id</span> = <span class="fn">setInterval</span>(() =&gt; {
+    <span class="var">console</span>.<span class="fn">log</span>(<span class="var">count</span>); <span class="cmt">// always logs 0! stale closure</span>
+  }, <span class="num">1000</span>);
+  <span class="kw">return</span> () =&gt; <span class="fn">clearInterval</span>(<span class="var">id</span>);
+}, []); <span class="cmt">// count is missing from deps</span></pre>
+      <div class="code-label good">✅ Fix — use functional updater OR add dep</div>
+      <pre class="fixed"><span class="hk">useEffect</span>(() =&gt; {
+  <span class="kw">const</span> <span class="var">id</span> = <span class="fn">setInterval</span>(() =&gt; {
+    <span class="fn">setCount</span>(<span class="var">prev</span> =&gt; <span class="var">prev</span> + <span class="num">1</span>); <span class="cmt">// always reads latest</span>
+  }, <span class="num">1000</span>);
+  <span class="kw">return</span> () =&gt; <span class="fn">clearInterval</span>(<span class="var">id</span>);
+}, []); <span class="cmt">// now it's fine — no closure issue</span></pre>
+
+      <div class="code-label bad">❌ PITFALL 4 — Object/array deps that always change</div>
+      <pre class="broken"><span class="cmt">// Objects are new references every render</span>
+<span class="hk">useEffect</span>(() =&gt; {
+  <span class="fn">fetchData</span>(<span class="var">options</span>);
+}, [<span class="var">options</span>]); <span class="cmt">// options = {} → new object every render = ♾️</span></pre>
+      <div class="code-label good">✅ Fix — use primitives or useMemo</div>
+      <pre class="fixed"><span class="cmt">// Use primitive values as deps instead of the whole object</span>
+<span class="hk">useEffect</span>(() =&gt; {
+  <span class="fn">fetchData</span>({ <span class="attr">page</span>: <span class="var">page</span>, <span class="attr">limit</span>: <span class="var">limit</span> });
+}, [<span class="var">page</span>, <span class="var">limit</span>]); <span class="cmt">// primitives ✓</span></pre>
+
+      <div class="experiment">
+        <div class="experiment-title">🧪 Experiment</div>
+        <ul>
+          <li>Intentionally create an infinite loop with Pitfall 1. Open DevTools and watch the renders fly.</li>
+          <li>Create the stale closure bug with Pitfall 3. Add a <code>console.log(count)</code> inside setInterval and watch it log 0 forever.</li>
+          <li>Fix both using the techniques above.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       LESSON 7 — Custom Hooks
+  ══════════════════════════════ -->
+  <div class="lesson" id="lesson-6">
+    <div class="lesson-header" onclick="toggleLesson(6)">
+      <span class="lesson-num">07</span>
+      <span class="lesson-title">Custom Hooks — Extracting Reusable Logic</span>
+      <span class="lesson-tag hook">hook</span>
+      <button class="check-btn" onclick="markDone(event,6)">✓</button>
+      <span class="arrow" id="arrow-6">▼</span>
+    </div>
+    <div class="lesson-body" id="body-6">
+      <p class="lesson-intro">When you find yourself writing the same <code>useState</code> + <code>useEffect</code> pattern in multiple components, extract it into a custom hook. A custom hook is just a function that starts with <code>use</code>.</p>
+
+      <div class="code-label normal">// Extract fetch logic into a reusable useFetch hook</div>
+      <pre><span class="cmt">// hooks/useFetch.js</span>
+<span class="kw">import</span> { <span class="hk">useState</span>, <span class="hk">useEffect</span> } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">useFetch</span>(<span class="var">url</span>) {
+  <span class="kw">const</span> [<span class="var">data</span>, <span class="fn">setData</span>]       = <span class="hk">useState</span>(<span class="kw">null</span>);
+  <span class="kw">const</span> [<span class="var">loading</span>, <span class="fn">setLoading</span>] = <span class="hk">useState</span>(<span class="kw">true</span>);
+  <span class="kw">const</span> [<span class="var">error</span>, <span class="fn">setError</span>]     = <span class="hk">useState</span>(<span class="kw">null</span>);
+
+  <span class="hk">useEffect</span>(() =&gt; {
+    <span class="kw">const</span> <span class="var">controller</span> = <span class="kw">new</span> <span class="fn">AbortController</span>();
+
+    <span class="kw">const</span> <span class="fn">load</span> = <span class="kw">async</span> () =&gt; {
+      <span class="kw">try</span> {
+        <span class="fn">setLoading</span>(<span class="kw">true</span>); <span class="fn">setError</span>(<span class="kw">null</span>);
+        <span class="kw">const</span> <span class="var">res</span> = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="var">url</span>, { <span class="attr">signal</span>: <span class="var">controller</span>.<span class="var">signal</span> });
+        <span class="kw">if</span> (!<span class="var">res</span>.<span class="var">ok</span>) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">`HTTP </span>${<span class="var">res</span>.<span class="var">status</span>}<span class="str">`</span>);
+        <span class="fn">setData</span>(<span class="kw">await</span> <span class="var">res</span>.<span class="fn">json</span>());
+      } <span class="kw">catch</span> (<span class="var">e</span>) {
+        <span class="kw">if</span> (<span class="var">e</span>.<span class="var">name</span> !== <span class="str">'AbortError'</span>) <span class="fn">setError</span>(<span class="var">e</span>.<span class="var">message</span>);
+      } <span class="kw">finally</span> {
+        <span class="fn">setLoading</span>(<span class="kw">false</span>);
+      }
+    };
+
+    <span class="fn">load</span>();
+    <span class="kw">return</span> () =&gt; <span class="var">controller</span>.<span class="fn">abort</span>();
+  }, [<span class="var">url</span>]);
+
+  <span class="kw">return</span> { <span class="var">data</span>, <span class="var">loading</span>, <span class="var">error</span> };
+}
+
+<span class="cmt">// Now use it in any component — one line!</span>
+<span class="kw">function</span> <span class="fn">UserList</span>() {
+  <span class="kw">const</span> { <span class="var">data</span>, <span class="var">loading</span>, <span class="var">error</span> } = <span class="fn">useFetch</span>(<span class="str">'https://jsonplaceholder.typicode.com/users'</span>);
+
+  <span class="kw">if</span> (<span class="var">loading</span>) <span class="kw">return</span> <span class="tag">&lt;p&gt;</span>Loading...<span class="tag">&lt;/p&gt;</span>;
+  <span class="kw">if</span> (<span class="var">error</span>) <span class="kw">return</span> <span class="tag">&lt;p&gt;</span>Error: {<span class="var">error</span>}<span class="tag">&lt;/p&gt;</span>;
+  <span class="kw">return</span> <span class="tag">&lt;ul&gt;</span>{<span class="var">data</span>.<span class="fn">map</span>(<span class="var">u</span> =&gt; <span class="tag">&lt;li</span> <span class="attr">key</span>={<span class="var">u</span>.<span class="var">id</span>}<span class="tag">&gt;</span>{<span class="var">u</span>.<span class="var">name</span>}<span class="tag">&lt;/li&gt;</span>)}<span class="tag">&lt;/ul&gt;</span>;
+}</pre>
+
+      <div class="code-label normal">// Another custom hook — useLocalStorage</div>
+      <pre><span class="kw">function</span> <span class="fn">useLocalStorage</span>(<span class="var">key</span>, <span class="var">initialValue</span>) {
+  <span class="kw">const</span> [<span class="var">value</span>, <span class="fn">setValue</span>] = <span class="hk">useState</span>(() =&gt; {
+    <span class="kw">try</span> {
+      <span class="kw">const</span> <span class="var">stored</span> = <span class="var">localStorage</span>.<span class="fn">getItem</span>(<span class="var">key</span>);
+      <span class="kw">return</span> <span class="var">stored</span> ? <span class="fn">JSON</span>.<span class="fn">parse</span>(<span class="var">stored</span>) : <span class="var">initialValue</span>;
+    } <span class="kw">catch</span> { <span class="kw">return</span> <span class="var">initialValue</span>; }
+  });
+
+  <span class="hk">useEffect</span>(() =&gt; {
+    <span class="var">localStorage</span>.<span class="fn">setItem</span>(<span class="var">key</span>, <span class="fn">JSON</span>.<span class="fn">stringify</span>(<span class="var">value</span>));
+  }, [<span class="var">key</span>, <span class="var">value</span>]);
+
+  <span class="kw">return</span> [<span class="var">value</span>, <span class="fn">setValue</span>];
+}
+
+<span class="cmt">// Use it like useState, but it persists to localStorage</span>
+<span class="kw">const</span> [<span class="var">theme</span>, <span class="fn">setTheme</span>] = <span class="fn">useLocalStorage</span>(<span class="str">'theme'</span>, <span class="str">'dark'</span>);</pre>
+
+      <div class="experiment">
+        <div class="experiment-title">🧪 Experiment</div>
+        <ul>
+          <li>Build your own <code>useFetch</code> hook. Use it in two different components with different URLs.</li>
+          <li>Build a <code>useWindowSize</code> hook that returns <code>{ width, height }</code> and updates on resize.</li>
+          <li>The naming rule is strict: custom hooks MUST start with <code>use</code>. Try naming one without it and see what React says.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       LESSON 8 — Rules of Hooks
+  ══════════════════════════════ -->
+  <div class="lesson" id="lesson-7">
+    <div class="lesson-header" onclick="toggleLesson(7)">
+      <span class="lesson-num">08</span>
+      <span class="lesson-title">Rules of Hooks — The Two Non-Negotiables</span>
+      <span class="lesson-tag concept">concept</span>
+      <button class="check-btn" onclick="markDone(event,7)">✓</button>
+      <span class="arrow" id="arrow-7">▼</span>
+    </div>
+    <div class="lesson-body" id="body-7">
+      <p class="lesson-intro">React hooks have two strict rules enforced by the linter. Breaking them causes silent, hard-to-debug bugs. Understand why they exist and you'll never break them.</p>
+
+      <div class="code-label bad">❌ RULE 1 — Never call hooks inside conditions or loops</div>
+      <pre class="broken"><span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">if</span> (<span class="var">someCondition</span>) {
+    <span class="kw">const</span> [<span class="var">count</span>, <span class="fn">setCount</span>] = <span class="hk">useState</span>(<span class="num">0</span>); <span class="cmt">// ❌ NEVER</span>
+  }
+
+  <span class="kw">for</span> (<span class="kw">let</span> <span class="var">i</span> = <span class="num">0</span>; <span class="var">i</span> &lt; <span class="num">3</span>; <span class="var">i</span>++) {
+    <span class="hk">useEffect</span>(() =&gt; {}); <span class="cmt">// ❌ NEVER</span>
+  }
+}</pre>
+
+      <div class="code-label good">✅ Always call hooks at the top level, unconditionally</div>
+      <pre class="fixed"><span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="cmt">// All hooks at the top, always called in the same order</span>
+  <span class="kw">const</span> [<span class="var">count</span>, <span class="fn">setCount</span>] = <span class="hk">useState</span>(<span class="num">0</span>);
+  <span class="hk">useEffect</span>(() =&gt; { <span class="cmt">/* ... */</span> }, []);
+
+  <span class="cmt">// Conditionals go INSIDE the hook, not around it</span>
+  <span class="hk">useEffect</span>(() =&gt; {
+    <span class="kw">if</span> (<span class="var">someCondition</span>) {
+      <span class="cmt">// do something conditionally</span>
+    }
+  }, [<span class="var">someCondition</span>]);
+}</pre>
+
+      <div class="code-label bad">❌ RULE 2 — Only call hooks from React functions</div>
+      <pre class="broken"><span class="cmt">// Regular JS functions can't use hooks</span>
+<span class="kw">function</span> <span class="fn">notAComponent</span>() {
+  <span class="kw">const</span> [<span class="var">x</span>, <span class="fn">setX</span>] = <span class="hk">useState</span>(<span class="num">0</span>); <span class="cmt">// ❌ Not a component or custom hook</span>
+}</pre>
+
+      <div class="code-label good">✅ Hooks only in: React components OR custom hooks (use...)</div>
+      <pre class="fixed"><span class="cmt">// ✅ React function component</span>
+<span class="kw">function</span> <span class="fn">MyComponent</span>() {
+  <span class="kw">const</span> [<span class="var">x</span>, <span class="fn">setX</span>] = <span class="hk">useState</span>(<span class="num">0</span>);
+}
+
+<span class="cmt">// ✅ Custom hook (starts with "use")</span>
+<span class="kw">function</span> <span class="fn">useMyHook</span>() {
+  <span class="kw">const</span> [<span class="var">x</span>, <span class="fn">setX</span>] = <span class="hk">useState</span>(<span class="num">0</span>);
+}</pre>
+
+      <div class="tip">
+        <div class="tip-title">💡 Why the order rule exists</div>
+        <p>React identifies hooks by their call order, not by name. It tracks "1st hook, 2nd hook, 3rd hook..." on every render. If you put a hook inside an if statement, it might be skipped on the next render — breaking React's internal count and causing wrong values to map to the wrong hooks.</p>
+      </div>
+
+      <div class="experiment">
+        <div class="experiment-title">🧪 Experiment</div>
+        <ul>
+          <li>Install the <code>eslint-plugin-react-hooks</code> plugin (it comes with Vite's React template). It enforces these rules automatically.</li>
+          <li>Try putting a useState inside an if block. The linter will flag it red before you even run it.</li>
+          <li>Look at your Day 1 and Day 2 code — are you already following these rules? You probably are without knowing it.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Final Challenge -->
+  <div class="final-challenge">
+    <div class="day-label" style="text-align:center;margin-bottom:0.5rem;">End of Day Challenge</div>
+    <h2>🏆 Live User Explorer</h2>
+    <p>Build a data-fetching app using everything from Days 1, 2, and 3.</p>
+    <div class="spec-list">
+      <div class="spec-item">Fetch users from <code>jsonplaceholder.typicode.com/users</code> on mount</div>
+      <div class="spec-item">Show loading spinner / skeleton while fetching</div>
+      <div class="spec-item">Show a proper error message if the fetch fails</div>
+      <div class="spec-item">Render a searchable, filterable list of user cards</div>
+      <div class="spec-item">Click a user to fetch and show their posts (<code>/posts?userId=X</code>)</div>
+      <div class="spec-item">Extract fetch logic into a <code>useFetch</code> custom hook</div>
+      <div class="spec-item">Cancel in-flight requests with <code>AbortController</code> on cleanup</div>
+      <div class="spec-item">Sync search query to <code>document.title</code> with useEffect</div>
+    </div>
+  </div>
+</div>
+
+<!-- Prev / Next -->
+<div class="day-nav">
+  <a class="day-nav-btn" href="../day02-state-and-events/LessonFiles-Day2.html">← Prev Day</a>
+  <div class="day-nav-center">Day 3 of 3</div>
+  <button class="day-nav-btn next disabled">Next Day →</button>
+</div>
+
+<script>
+  const TOTAL = 8;
+  const state = JSON.parse(localStorage.getItem('day03-progress') || '{}');
+  const openState = JSON.parse(localStorage.getItem('day03-open') || '{}');
+
+  function save() { localStorage.setItem('day03-progress', JSON.stringify(state)); }
+  function saveOpen() { localStorage.setItem('day03-open', JSON.stringify(openState)); }
+
+  function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('open'); }
+  function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+  function goTo(page) { window.location.href = page; }
+
+  function jumpLesson(i) {
+    closeSidebar();
+    const body = document.getElementById('body-' + i);
+    const arrow = document.getElementById('arrow-' + i);
+    if (!body.classList.contains('open')) {
+      body.classList.add('open');
+      arrow.style.transform = 'rotate(180deg)';
+      openState[i] = true; saveOpen();
+    }
+    setTimeout(() => { document.getElementById('lesson-' + i).scrollIntoView({ behavior:'smooth', block:'start' }); }, 80);
+    document.querySelectorAll('.sidebar-link[id^="sb-l"]').forEach(el => el.classList.remove('active'));
+    document.getElementById('sb-l' + i)?.classList.add('active');
+  }
+
+  function toggleLesson(i) {
+    const body = document.getElementById('body-' + i);
+    const arrow = document.getElementById('arrow-' + i);
+    const open = body.classList.contains('open');
+    body.classList.toggle('open', !open);
+    arrow.style.transform = open ? '' : 'rotate(180deg)';
+    openState[i] = !open; saveOpen();
+  }
+
+  function switchTab(e, panelId) {
+    e.stopPropagation();
+    const tabGroup = e.target.parentElement;
+    const variants = tabGroup.closest('.variants');
+    tabGroup.querySelectorAll('.vtab').forEach(t => t.classList.remove('active'));
+    e.target.classList.add('active');
+    variants.querySelectorAll('.vpanel').forEach(p => p.classList.remove('active'));
+    document.getElementById(panelId).classList.add('active');
+  }
+
+  function markDone(e, i) {
+    e.stopPropagation();
+    const lesson = document.getElementById('lesson-' + i);
+    const dot = document.querySelector(`.progress-dot[data-lesson="${i}"]`);
+    const sbLink = document.getElementById('sb-l' + i);
+    state[i] = !state[i]; save();
+    lesson.classList.toggle('completed', state[i]);
+    dot.classList.toggle('done', state[i]);
+    const existingDot = sbLink?.querySelector('.sidebar-done-dot');
+    if (state[i] && sbLink && !existingDot) {
+      const d = document.createElement('span'); d.className = 'sidebar-done-dot'; sbLink.appendChild(d);
+    } else if (!state[i] && existingDot) { existingDot.remove(); }
+  }
+
+  // Restore
+  for (let i = 0; i < TOTAL; i++) {
+    if (state[i]) {
+      document.getElementById('lesson-' + i)?.classList.add('completed');
+      document.querySelector(`.progress-dot[data-lesson="${i}"]`)?.classList.add('done');
+      const sbLink = document.getElementById('sb-l' + i);
+      if (sbLink) { const d = document.createElement('span'); d.className = 'sidebar-done-dot'; sbLink.appendChild(d); }
+    }
+    if (openState[i] === true) {
+      document.getElementById('body-' + i)?.classList.add('open');
+      const arrow = document.getElementById('arrow-' + i);
+      if (arrow) arrow.style.transform = 'rotate(180deg)';
+    }
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+</script>
+</body>
+</html>
